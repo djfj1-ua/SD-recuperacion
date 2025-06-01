@@ -16,7 +16,7 @@ class EC_DE:
 
     def iniciar_servidor_sensores(self):
         self.servidor_sensores = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.servidor_sensores.bind((self.sensores_ip, self.sensores_puerto))  # Puerto para comunicación con EC_S
+        self.servidor_sensores.bind((self.sensores_ip, self.sensores_puerto))
         self.servidor_sensores.listen(1)
         print("[EC_DE] Esperando conexión de EC_S...")
         sensor_socket, direccion = self.servidor_sensores.accept()
@@ -40,7 +40,6 @@ class EC_DE:
                             campos = data.split('#')
                             if campos[0] == 'SENSOR':
                                 self.sensor_status = campos[1]
-                                # Enviar ACK a EC_S
                                 sensor_socket.send('ACK'.encode())
                                 print(f"[EC_DE] Estado del sensor actualizado: {self.sensor_status}")
                             else:
@@ -64,15 +63,14 @@ class EC_DE:
         return str(lrc)  
     
     def verificar_lrc(self, data, lrc):
-        # Implementar la verificación del LRC
         calculated_lrc = self.calcular_lrc(data)
-        return str(calculated_lrc) == lrc.strip()  # Compara correctamente
+        return str(calculated_lrc) == lrc.strip()
     
 if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description="Ejecutar EC_DE con parámetros de conexión y autenticación.")
 
-    parser.add_argument('sensores_ip', type=str, default='localhost', help='IP de EC_S')        # Sensores IP y Puerto
+    parser.add_argument('sensores_ip', type=str, default='localhost', help='IP de EC_S')
     parser.add_argument('sensores_puerto', type=int, default=8888, help='Puerto de EC_S')
 
     args = parser.parse_args()
