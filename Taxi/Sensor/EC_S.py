@@ -8,6 +8,7 @@ class EC_S:
         self.ip = ip
         self.puerto = puerto
         self.parar = False  # Cuando está en true, tiene que hacer que el taxi pare
+        self.activo = True
         self.conectar_de()
 
     def conectar_de(self):
@@ -32,11 +33,11 @@ class EC_S:
         return str(lrc)
 
     def enviar_datos(self):
-        while True:
+        while self.activo:
             time.sleep(1)
             if self.parar:
                 sensor_status = 'PARADA'
-                self.parar = False  # Se resetea la flag cuando se envía el error
+                #self.parar = False  # Se resetea la flag cuando se envía el error
             else:
                 sensor_status = "OK"
 
@@ -45,8 +46,9 @@ class EC_S:
             mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
 
             try:
-                self.socket_de.send(mensaje.encode())
-                print(f"[Sensor] Enviando estado del sensor: {sensor_status}")
+                if self.activo:
+                    self.socket_de.send(mensaje.encode())
+                #print(f"[Sensor] Enviando estado del sensor: {sensor_status}")
                 # Esperar ACK
                 respuesta = self.socket_de.recv(1024).decode()
                 if respuesta != 'ACK':
@@ -58,9 +60,28 @@ class EC_S:
                 break  # Salir del bucle si se pierde conexión
 
     def detectar_paro(self):
-        while True:
-            input("[Sensor] Presione Enter para simular un error...")
-            self.parar = True
+        while self.activo:
+            comando = input("[Sensor] Escriba 'p' para simular un error o 'q' para salir: ").strip().lower()
+            if comando == 'p':
+                if self.parar:
+                    self.parar = False  # Resetea la flag si ya estaba en parada
+                else:
+                    self.parar = True
+            elif comando == 'q':
+                print("[Sensor] Enviando mensaje de desconexión al servidor...")
+                try:
+                    mensaje = "<STX>DISCONNECT<ETX><LRC>0"
+                    self.socket_de.send(mensaje.encode())
+                    self.activo = False  # Detener el envío de datos
+                    time.sleep(2)
+                    self.socket_de.close()  # Cierra el socket
+                except Exception as e:
+                    print(f"[Sensor] No se pudo notificar desconexión: {e}")
+    
+                print("[Sensor] Finalizando programa.")
+                exit(0)
+            else:
+                print("[Sensor] Comando no reconocido. Use 'p' o 'q'.")
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ejecutar EC_S con parámetros de conexión.")
@@ -74,5 +95,8 @@ if __name__ == "__main__":
 
     ec_s = EC_S(ip, puerto)
 
-    while True:
-        time.sleep(1)
+    try:
+        while True:
+            time.sleep(1)
+    except KeyboardInterrupt:
+        print("[SENSOR] Programa finalizado por el usuario.")

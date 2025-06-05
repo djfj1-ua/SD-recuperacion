@@ -17,24 +17,29 @@ class EC_DE:
     def iniciar_servidor_sensores(self):
         self.servidor_sensores = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.servidor_sensores.bind((self.sensores_ip, self.sensores_puerto))
-        self.servidor_sensores.listen(1)
-        print("[EC_DE] Esperando conexión de EC_S...")
-        sensor_socket, direccion = self.servidor_sensores.accept()
-        print(f"[EC_DE] Conexión de EC_S desde {direccion}")
-        threading.Thread(target=self.recibir_datos_sensor, args=(sensor_socket,), daemon=True).start()
+        self.servidor_sensores.listen()
+        print(f"[EC_DE] Servidor de sensores iniciado en {self.sensores_ip}:{self.sensores_puerto}")
+        while True:
+            print("[EC_DE] Esperando conexión de EC_S...")
+            sensor_socket, direccion = self.servidor_sensores.accept()
+            print(f"[EC_DE] Conexión de EC_S desde {direccion}")
+            threading.Thread(target=self.recibir_datos_sensor, args=(sensor_socket,), daemon=True).start()
 
     def recibir_datos_sensor(self, sensor_socket):
         while True:
             try:    
                 mensaje = sensor_socket.recv(1024).decode()
                 if mensaje:
-                    print(f"[EC_DE] Mensaje recibido de EC_S: {mensaje}")
+                    #print(f"[EC_DE] Mensaje recibido de EC_S: {mensaje}")
                     stx_index = mensaje.find('<STX>')
                     etx_index = mensaje.find('<ETX>')
                     lrc_index = mensaje.find('<LRC>')
 
                     if stx_index != -1 and etx_index != -1 and lrc_index != -1:
                         data = mensaje[stx_index+5:etx_index]
+                        if data == "DISCONNECT":
+                            print(f"[EC_DE] Sensor {self.sensores_ip} solicitó desconexión.")
+                            break
                         lrc = mensaje[lrc_index+5:]
                         if self.verificar_lrc(data, lrc):
                             campos = data.split('#')
@@ -53,7 +58,7 @@ class EC_DE:
             except Exception as e:
                 print(f"[EC_DE] Error en la conexión con el sensor: {e}")
                 break
-        print("[EC_DE] Sensor desconectado. Deteniendo taxi.")
+            
         self.sensor_status = 'CONTINGENCY'
 
     def calcular_lrc(self, data):
@@ -85,3 +90,4 @@ if __name__ == "__main__":
             time.sleep(1)
     except KeyboardInterrupt:
         print("[EC_DE] Programa finalizado por el usuario.")
+        ec_de.servidor_sensores.close()
