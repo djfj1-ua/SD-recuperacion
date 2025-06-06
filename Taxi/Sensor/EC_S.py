@@ -4,9 +4,9 @@ import time
 import argparse
 
 class EC_S:
-    def __init__(self, ip, puerto):
-        self.ip = ip
-        self.puerto = puerto
+    def __init__(self, ip_engine, puerto_engine):
+        self.ip_engine = ip_engine
+        self.puerto_engine = puerto_engine
         self.parar = False  # Cuando está en true, tiene que hacer que el taxi pare
         self.activo = True
         self.conectar_de()
@@ -14,14 +14,14 @@ class EC_S:
     def conectar_de(self):
         self.socket_de = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
-            self.socket_de.connect((self.ip, self.puerto))
+            self.socket_de.connect((self.ip_engine, self.puerto_engine))
             print("[Sensor] Conectándose al EC_DE.")
             # Inicio del envío de datos
             threading.Thread(target=self.enviar_datos, daemon=True).start()
             # Iniciar el hilo para la detección de parada
             threading.Thread(target=self.detectar_paro, daemon=True).start()
         except ConnectionRefusedError:
-            print(f"[Sensor] No se pudo conectar al EC_DE en {self.ip}:{self.puerto}. Asegúrate de que EC_DE esté en ejecución.")
+            print(f"[Sensor] No se pudo conectar al EC_DE en {self.ip_engine}:{self.puerto_engine}. Asegúrate de que EC_DE esté en ejecución.")
         except Exception as e:
             print(f"[Sensor] Ocurrió un error al intentar conectarse: {e}")
             exit(1)
@@ -90,10 +90,10 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    ip = args.ip
-    puerto = args.puerto
+    ip_engine = args.ip
+    puerto_engine = args.puerto
 
-    ec_s = EC_S(ip, puerto)
+    ec_s = EC_S(ip_engine, puerto_engine)
 
     try:
         while True:

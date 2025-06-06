@@ -1,0 +1,26 @@
+[
+    {
+        "id": "1",
+        "estado": "FREE",
+        "posicion": [
+            1,
+            1
+        ]
+    },
+    {
+        "id": "2",
+        "estado": "FREE",
+        "posicion": [
+            1,
+            1
+        ]
+    },
+    {
+        "id": "3",
+        "estado": "FREE",
+        "posicion": [
+            1,
+            1
+        ]
+    }
+]
