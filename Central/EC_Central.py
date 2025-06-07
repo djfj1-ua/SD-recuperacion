@@ -12,6 +12,7 @@ class EC_Central:
         self.ip_broker = ip_broker
         self.puerto_broker = puerto_broker
         self.taxis_disponibles = {}  # Diccionario para almacenar taxis y sus estados
+        self.taxis_autenticados = {}  # Diccionario para almacenar taxis autenticados
         self.db_path = 'taxis.json'  # Ruta del archivo JSON con los taxis
         self.cargar_taxis_desde_bd()
         self.iniciar_servidor()
@@ -31,6 +32,8 @@ class EC_Central:
             threading.Thread(target=self.autenticacion_taxi, args=(taxi_socket, direccion,), daemon=True).start()
 
     def autenticacion_taxi(self, taxi_socket, direccion):
+        id_taxi_auth = None  # Inicializar id_taxi_auth 
+        autenticado_en_esta_sesion = False  # Flag para verificar autenticación en esta sesión
         while True:
             try:    
                 mensaje = taxi_socket.recv(1024).decode()
@@ -48,9 +51,15 @@ class EC_Central:
                             if campos[0] == 'TAXI':
                                 id_taxi_auth = campos[1]
                                 if id_taxi_auth in self.taxis_disponibles:
-                                    taxi_socket.send('ACK'.encode())
-                                    print(f"[EC_Central] Taxi {id_taxi_auth} autenticado.")
-                                    taxi_socket.send(f'ACK'.encode())
+                                    if id_taxi_auth not in self.taxis_autenticados:
+                                        print(f"[EC_Central] Taxi {id_taxi_auth} autenticado.")
+                                        self.taxis_autenticados[id_taxi_auth] = self.taxis_disponibles[id_taxi_auth]
+                                        autenticado_en_esta_sesion = True
+                                        taxi_socket.send('ACK'.encode())
+                                    else:
+                                        taxi_socket.send('NACK'.encode())
+                                        print(f"[EC_Central] Error: Taxi {id_taxi_auth} ya autenticado.")
+                                        taxi_socket.send('NACK'.encode())
                                 else:
                                     taxi_socket.send('NACK'.encode())
                                     print(f"[EC_Central] Taxi {id_taxi_auth} no reconocido.")
@@ -63,6 +72,17 @@ class EC_Central:
                         taxi_socket.send('NACK'.encode())
                 else:
                     break
+            except ConnectionResetError:
+                if autenticado_en_esta_sesion and id_taxi_auth in self.taxis_autenticados:
+                    del self.taxis_autenticados[id_taxi_auth]
+                    print(f"[EC_Central] Conexión con el taxi {id_taxi_auth}:{direccion} perdida.")
+                    autenticado_en_esta_sesion = False
+                    taxi_socket.close()
+                else:
+                    print(f"[EC_Central] Taxi {direccion} no autenticado. Cerrando conexión.")
+                    taxi_socket.close() 
+                break
+
             except Exception as e:
                 print(f"[EC_Central] Error en la conexión con el taxi: {e}")
                 break
@@ -133,5 +153,3 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         print("[EC_Central] Programa finalizado por el usuario.")
         ec_central.servidor.close()
-        ec_central.broker_socket.close()
-        exit(0)

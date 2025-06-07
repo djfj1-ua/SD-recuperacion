@@ -102,40 +102,54 @@ class EC_DE:
             # Esperar ACK
             respuesta = self.socket_de.recv(1024).decode()
             if respuesta != 'ACK':
-                print(f"[Taxi] Error al enviar estado del sensor.")
+                print(f"[Taxi] Error al autenticar taxi.")
+                exit(1)
             else:
-                print(f"[Taxi] ACK recibido de Central.")
+                print(f"[Taxi] Taxi autenticado con exito.")
         except Exception as e:
             print(f"[Taxi] Error al enviar estado del sensor: {e}")
     
 if __name__ == "__main__":
-
-    parser = argparse.ArgumentParser(description="Ejecutar EC_DE con parámetros de conexión y autenticación.")
-
-    parser.add_argument('id_taxi', type=str, help='ID del taxi')
-    parser.add_argument('sensores_ip', type=str, help='IP de EC_S')
-    parser.add_argument('sensores_puerto', type=int, help='Puerto de EC_S')
-    parser.add_argument('central_ip', type=str, help='IP de EC_Central')
-    parser.add_argument('central_puerto', type=int, help='Puerto de EC_Central')
-    parser.add_argument('broker_ip', type=str, help='IP de broker')
-    parser.add_argument('broker_puerto', type=int, help='Puerto de broker')
-    
-
-    args = parser.parse_args()
-
-    sensores_ip = args.sensores_ip
-    sensores_puerto = args.sensores_puerto
-    central_ip = args.central_ip
-    central_puerto = args.central_puerto
-    broker_ip = args.broker_ip
-    broker_puerto = args.broker_puerto
-    id_taxi = args.id_taxi
-
-    ec_de = EC_DE(id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto)
-
     try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("[EC_DE] Programa finalizado por el usuario.")
-        ec_de.servidor_sensores.close()
+        parser = argparse.ArgumentParser(description="Ejecutar EC_DE con parámetros de conexión y autenticación.")
+
+        parser.add_argument('id_taxi', type=str, help='ID del taxi')
+        parser.add_argument('sensores_ip', type=str, help='IP de EC_S')
+        parser.add_argument('sensores_puerto', type=int, help='Puerto de EC_S')
+        parser.add_argument('central_ip', type=str, help='IP de EC_Central')
+        parser.add_argument('central_puerto', type=int, help='Puerto de EC_Central')
+        parser.add_argument('broker_ip', type=str, help='IP de broker')
+        parser.add_argument('broker_puerto', type=int, help='Puerto de broker')
+        
+
+        args = parser.parse_args()
+
+        sensores_ip = args.sensores_ip
+        sensores_puerto = args.sensores_puerto
+        central_ip = args.central_ip
+        central_puerto = args.central_puerto
+        broker_ip = args.broker_ip
+        broker_puerto = args.broker_puerto
+        id_taxi = args.id_taxi
+
+        ec_de = EC_DE(id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto)
+
+        try:
+            while True:
+                time.sleep(1)
+        except KeyboardInterrupt:
+            print("[Taxi] Programa finalizado por el usuario.")
+            ec_de.servidor_sensores.close()
+        
+    except Exception as e:
+        try:
+            data = f'ERROR_TAXI#{id_taxi}'
+            lrc = ec_de.calcular_lrc(data)
+            mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
+            mensaje = "<STX>ERROR_TAXI<ETX><LRC>0"
+            ec_de.socket_de.send(mensaje.encode())
+            print("[Taxi] Error inesperado, se notificó a la Central.")
+        except:
+            print("[Taxi] Error fatal y no se pudo notificar a la Central.")
+        finally:
+            exit(1)
