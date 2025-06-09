@@ -3,19 +3,25 @@ import time
 import threading
 import argparse 
 import json
+import kafka
+from kafka import KafkaProducer, KafkaConsumer
 
 SERVER = socket.gethostbyname(socket.gethostname())
 
 class EC_Central:
-    def __init__(self, puerto, ip_broker, puerto_broker):
+    def __init__(self, puerto, ip_broker, map_path, db_path):
         self.puerto = puerto
         self.ip_broker = ip_broker
-        self.puerto_broker = puerto_broker
         self.taxis_disponibles = {}  # Diccionario para almacenar taxis y sus estados
         self.taxis_autenticados = {}  # Diccionario para almacenar taxis autenticados
-        self.db_path = 'taxis.json'  # Ruta del archivo JSON con los taxis
-        self.cargar_taxis_desde_bd()
+        self.db_path = db_path  # Ruta del archivo JSON con los taxis
+        self.mapa = [[0 for _ in range(20)] for _ in range(20)]  # Mapa de 20x20
+        self.lock = threading.Lock()  # Lock para manejar el acceso concurrente a taxis_disponibles y taxis_autenticados
+        self.cerrar = False  # Flag para cerrar el servidor
+        self.map_path = map_path  # Ruta del mapa de localizaciones
+        self.cargar_taxis()
         self.iniciar_servidor()
+        self.init_kafka()
 
     def iniciar_servidor(self):
         threading.Thread(target=self.iniciar_servidor_taxis, daemon=True).start()
@@ -30,6 +36,44 @@ class EC_Central:
             taxi_socket, direccion = self.servidor.accept()
             print(f"[EC_Central] Conexión de taxi desde {direccion}")
             threading.Thread(target=self.autenticacion_taxi, args=(taxi_socket, direccion,), daemon=True).start()
+
+    def init_kafka(self):
+        self.producer = KafkaProducer(bootstrap_servers=[self.ip_broker])
+        self.consumer = KafkaConsumer('solicitudes_taxis', bootstrap_servers=[self.ip_broker], group_id='central')
+        self.producer_resp = KafkaProducer(bootstrap_servers=[self.ip_broker])
+
+        self.producer_map = KafkaProducer(bootstrap_servers=[self.ip_broker])
+
+    def cargar_mapa(self):
+        try:
+            with open(self.map_path, 'r') as mapa:
+                config_map = json.load(mapa)
+                for localizacion in config_map['localizaciones']:
+                    x, y = localizacion['x'], localizacion['y']
+                    self.mapa[x][y] = localizacion['id']
+                
+                for taxi in config_map['taxis']:
+                    x, y = taxi['posicion']['x'], taxi['posicion']['y']
+                    self.mapa[x][y] = f'T{taxi["id"]}'
+                    self.taxis_disponibles.append(taxi['id'])
+            print("[Central] Mapa cargado correctamente.")
+        except Exception as e:
+            print(f"[Central] Error al cargar el mapa: {e}")
+
+    def cargar_localizaciones(self):
+        # Lee el archivo EC_locations.json y carga las localizaciones en el mapa
+        try:
+            with open(self.map_path, 'r') as archivo_localizaciones:
+                configuracion_localizaciones = json.load(archivo_localizaciones)
+                self.localizaciones = {}
+                for localizacion in configuracion_localizaciones['locations']:
+                    id_localizacion = localizacion['Id']
+                    x, y = map(int, localizacion['POS'].split(','))
+                    self.mapa[x][y] = id_localizacion
+                    self.localizaciones[id_localizacion] = (x, y)
+                print("Localizaciones cargadas correctamente.")
+        except Exception as e:
+            print(f"Error cargando las localizaciones: {e}")
 
     def autenticacion_taxi(self, taxi_socket, direccion):
         id_taxi_auth = None  # Inicializar id_taxi_auth 
@@ -97,7 +141,7 @@ class EC_Central:
         calculated_lrc = self.calcular_lrc(data)
         return str(calculated_lrc) == lrc.strip()
     
-    def cargar_taxis_desde_bd(self):
+    def cargar_taxis(self):
         try:
             with open(self.db_path, 'r') as archivo_taxis:
                 taxis_data = json.load(archivo_taxis)
@@ -132,24 +176,29 @@ class EC_Central:
         except Exception as e:
             print(f"Error cargando los taxis: {e}")
 
+    #def iniciar_central(self): #Iniciar GUI y los comandos arbitrarios
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="EC_Central - Central de control de taxis")
     
     parser.add_argument('puerto', type=int, help='puerto del servidor central')
     parser.add_argument('ip_broker', type=str, help='IP del broker')
-    parser.add_argument('puerto_broker', type=int, help='Puerto del broker')
+    parser.add_argument('db_path', type=str, help='Base de datos de los taxis')
 
     args = parser.parse_args()
 
     puerto = args.puerto
     ip_broker = args.ip_broker
-    puerto_broker = args.puerto_broker
+    db_path = args.db_path
+    map_path = "EC_locations.json"  # Ruta del mapa de localizaciones
 
-    ec_central = EC_Central(puerto, ip_broker, puerto_broker)
+    ec_central = EC_Central(puerto, ip_broker, map_path, db_path)
+
+    ec_central.cargar_mapa()  # Cargar el mapa al iniciar
+    ec_central.cargar_taxis()  # Cargar los taxis al iniciar
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("[EC_Central] Programa finalizado por el usuario.")
-        ec_central.servidor.close()
+        print("[Central] Programa finalizado por el usuario.")
