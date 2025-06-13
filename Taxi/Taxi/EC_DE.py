@@ -108,6 +108,20 @@ class EC_DE:
                 print(f"[Taxi] Taxi autenticado con exito.")
         except Exception as e:
             print(f"[Taxi] Error al enviar estado del sensor: {e}")
+
+    def reconectar_central(self):
+        while not self.conectado_central:
+            try:
+                self.socket_central = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+                self.socket_central.connect((self.central_ip, self.central_puerto))
+                print("[EC_DE] Reconectado a EC_Central.")
+                self.conectado_central = True
+                self.autenticar()
+                # Reanudar escuchando instrucciones
+                threading.Thread(target=self.escuchar_instrucciones, daemon=True).start()
+            except Exception as e:
+                print(f"[EC_DE] No se pudo reconectar a EC_Central: {e}")
+                time.sleep(5)
     
 if __name__ == "__main__":
     try:
