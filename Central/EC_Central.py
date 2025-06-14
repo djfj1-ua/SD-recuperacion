@@ -26,6 +26,7 @@ class EC_Central:
     def iniciar_servidor(self):
         threading.Thread(target=self.iniciar_servidor_taxis, daemon=True).start()
         threading.Thread(target=self.procesar_solicitudes_cliente, daemon=True).start()
+        threading.Thread(target=self.recibir_estado_taxi, daemon=True).start() 
 
     def iniciar_servidor_taxis(self):
         self.servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -40,11 +41,9 @@ class EC_Central:
 
     def init_kafka(self):
         self.producer = KafkaProducer(bootstrap_servers=[self.ip_broker])
-        self.consumer = KafkaConsumer('solicitudes_taxis', bootstrap_servers=[self.ip_broker], group_id='central')
         self.consumerSol = KafkaConsumer('cliente_solicitud', bootstrap_servers=[self.ip_broker])
-        self.producer_resp = KafkaProducer(bootstrap_servers=[self.ip_broker])
-
-        self.producer_map = KafkaProducer(bootstrap_servers=[self.ip_broker])
+        self.consumerTaxi = kafka.KafkaConsumer('taxi_instrucciones', bootstrap_servers=[self.ip_broker])
+        self.consumerTaxiEstado = kafka.KafkaConsumer('taxi_estado', bootstrap_servers=[self.ip_broker])
 
     def procesar_solicitudes_cliente(self):
         for mensaje in self.consumerSol:
@@ -59,7 +58,9 @@ class EC_Central:
                 print(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
     
                 taxi_id = self.unir_taxi_cliente(cliente_id, destino_coord)
+                print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
                 if taxi_id:
+                    print(f"Holiwis2")
                     self.llevar_taxi_a_cliente(taxi_id, cliente_id, destino_coord, origen_coord)
                     self.enviar_mensaje_cliente(cliente_id, 'Taxi asignado')
                 else:
@@ -154,6 +155,21 @@ class EC_Central:
                 print(f"[EC_Central] Error en la conexión con el taxi: {e}")
                 break
 
+    def recibir_estado_taxi(self):
+        print(f"Holiwis34")
+        for mensaje in self.consumerTaxiEstado:
+            print(f"[EC_Central] Mensaje recibido de taxi_estado: {mensaje.value.decode()}")
+            if mensaje.key.decode() in self.taxis_disponibles:
+                print(f"[EC_Central] Actualizando estado del taxi {mensaje.key.decode()}")
+                solicitud = json.loads(mensaje)
+                id_taxi_estado = solicitud['taxi_id']
+                taxi_estado = solicitud['estado']
+                taxi_posicion = solicitud['posicion']
+                self.taxis_disponibles[id_taxi_estado]['estado'] = taxi_estado
+                self.taxis_disponibles[id_taxi_estado]['posicion'] = taxi_posicion
+                print(f"[EC_Central] Estado del taxi {id_taxi_estado} actualizado: {taxi_estado}, Posición: {taxi_posicion}")
+
+
     def calcular_lrc(self, data):
         lrc = 0
         for byte in data.encode():
@@ -206,7 +222,7 @@ class EC_Central:
             'estado': estado,
         }
         self.producer.send('cliente_respuesta', key=id_cliente.encode(),value=json.dumps(mensaje).encode())
-        print(f"[Central] Enviada respuesta al cliente {id_cliente}: {estado}")
+        print(f"[EC_Central] Enviada respuesta al cliente {id_cliente}: {estado}")
 
     def unir_taxi_cliente(self, cliente_id, destino_coord):
         for taxi_id, taxi_info in self.taxis_autenticados.items():
@@ -218,9 +234,9 @@ class EC_Central:
                 print(f"Taxi {taxi_id} asignado al cliente {cliente_id} con destino {destino_coord}.")
                 return taxi_id
         print(f"No hay taxis disponibles.")
-        return None
     
     def llevar_taxi_a_cliente(self, taxi_id, cliente_id, destino, cliente_origen):
+        print(f"Holiwis3")
         taxi_info = self.taxis_autenticados.get(taxi_id)
         #cliente_origen = self.localizaciones[cliente_id]['origen']
 
@@ -229,19 +245,27 @@ class EC_Central:
             taxi_info['estado'] = 'RUN'
             self.actualizar_mapa = True
             self.enviar_instrucciones_taxi(taxi_id, cliente_origen)
-
+            time.sleep(20)
             # Una vez en el origen, cambia el estado del cliente a "RECOGIDO"
             taxi_info['estado'] = 'BUSY'
             print(f"Taxi {taxi_id} ha llegado a {cliente_origen} para recoger al cliente.")
             self.actualizar_tabla = True
-            
+            time.sleep(20)
             # Instrucciones para llevar al cliente al destino
             print(f"Taxi {taxi_id} llevando al cliente {cliente_id} a {destino}.")
             self.enviar_instrucciones_taxi(taxi_id, destino)
 
-            # Aquí no eliminamos al cliente, solo actualizamos su estado
         else:
             print(f"[CENTRAL] No se pudo enviar taxi {taxi_id} al cliente {cliente_id}.")
+
+    def enviar_instrucciones_taxi(self, taxi_id, destino):
+        print(f"[EC_Central] Enviando instrucciones al taxi {taxi_id} para ir a {destino}.")
+        time.sleep(0.5)
+        mensaje = {
+            'taxi_id': taxi_id,
+            'destino': destino
+        }
+        self.producer.send('taxi_instrucciones', key=taxi_id.encode(), value=json.dumps(mensaje).encode())
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="EC_Central - Central de control de taxis")
@@ -260,10 +284,9 @@ if __name__ == "__main__":
     ec_central = EC_Central(puerto, ip_broker, map_path, db_path)
 
     ec_central.cargar_localizaciones()  
-    ec_central.cargar_taxis()
 
     try:
         while True:
             time.sleep(1)
     except KeyboardInterrupt:
-        print("[Central] Programa finalizado por el usuario.")
+        print("[EC_Central] Programa finalizado por el usuario.")

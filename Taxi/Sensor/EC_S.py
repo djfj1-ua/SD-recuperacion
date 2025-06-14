@@ -4,9 +4,10 @@ import time
 import argparse
 
 class EC_S:
-    def __init__(self, ip_engine, puerto_engine):
+    def __init__(self, ip_engine, puerto_engine, id_sensor):
         self.ip_engine = ip_engine
         self.puerto_engine = puerto_engine
+        self.id_sensor = id_sensor
         self.parar = False  # Cuando está en true, tiene que hacer que el taxi pare
         self.activo = True
         self.conectar_de()
@@ -37,11 +38,10 @@ class EC_S:
             time.sleep(1)
             if self.parar:
                 sensor_status = 'PARADA'
-                #self.parar = False  # Se resetea la flag cuando se envía el error
             else:
                 sensor_status = "OK"
 
-            data = f'SENSOR#{sensor_status}'
+            data = f'SENSOR#{sensor_status}#{self.id_sensor}'
             lrc = self.calcular_lrc(data)
             mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
 
@@ -87,13 +87,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Ejecutar EC_S con parámetros de conexión.")
     parser.add_argument('ip', type=str, help='IP de EC_DE')
     parser.add_argument('puerto', type=int, help='Puerto de EC_DE')
+    parser.add_argument('id_sensor', type=str, help='ID del sensor')
 
     args = parser.parse_args()
 
     ip_engine = args.ip
     puerto_engine = args.puerto
+    id_sensor = args.id_sensor
 
-    ec_s = EC_S(ip_engine, puerto_engine)
+    ec_s = EC_S(ip_engine, puerto_engine, id_sensor)
 
     try:
         while True:

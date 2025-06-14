@@ -3,6 +3,8 @@ import threading
 import time
 import json
 import argparse
+import kafka
+from kafka import KafkaProducer, KafkaConsumer
 
 class EC_DE:
     def __init__(self, id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto):
@@ -13,9 +15,17 @@ class EC_DE:
         self.broker_ip = broker_ip
         self.broker_puerto = broker_puerto
         self.id_taxi = id_taxi
+        self.estado_sensores = {}
+        self.parar_taxi = False  # Indica si el taxi debe detenerse
+        self.posicion = (1,1)
+        self.lock = threading.Lock()
         self.sensor_status = 'OK'  # Estado inicial de los sensores
+        self.producer = KafkaProducer(bootstrap_servers=[self.broker_ip])
+        self.consumerTaxi = kafka.KafkaConsumer('taxi_instrucciones', bootstrap_servers=[self.broker_ip])
+
         self.inicio_sensores()
         self.conectar_de()
+
 
     def inicio_sensores(self):
         threading.Thread(target=self.iniciar_servidor_sensores, daemon=True).start()
@@ -24,11 +34,11 @@ class EC_DE:
         self.servidor_sensores = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.servidor_sensores.bind((self.sensores_ip, self.sensores_puerto))
         self.servidor_sensores.listen()
-        print(f"[Taxi] Servidor de sensores iniciado en {self.sensores_ip}:{self.sensores_puerto}")
+        print(f"[Taxi - {self.id_taxi}] Servidor de sensores iniciado en {self.sensores_ip}:{self.sensores_puerto}")
         while True:
-            print("[Taxi] Esperando conexión de EC_S...")
+            print(f"[Taxi - {self.id_taxi}] Esperando conexión de EC_S...")
             sensor_socket, direccion = self.servidor_sensores.accept()
-            print(f"[Taxi] Conexión de EC_S desde {direccion}")
+            print(f"[Taxi - {self.id_taxi}] Conexión de EC_S desde {direccion}")
             threading.Thread(target=self.recibir_datos_sensor, args=(sensor_socket,), daemon=True).start()
 
     def recibir_datos_sensor(self, sensor_socket):
@@ -44,15 +54,21 @@ class EC_DE:
                     if stx_index != -1 and etx_index != -1 and lrc_index != -1:
                         data = mensaje[stx_index+5:etx_index]
                         if data == "DISCONNECT":
-                            print(f"[Taxi] Sensor {self.sensores_ip} solicitó desconexión.")
+                            print(f"[Taxi - {self.id_taxi}] Sensor {self.sensores_ip} solicitó desconexión.")
                             break
                         lrc = mensaje[lrc_index+5:]
                         if self.verificar_lrc(data, lrc):
                             campos = data.split('#')
                             if campos[0] == 'SENSOR':
                                 self.sensor_status = campos[1]
+                                with self.lock:
+                                    if campos[1] == 'PARADA':
+                                        self.estado_sensores[campos[2]] = True
+                                    else:
+                                        self.estado_sensores[campos[2]] = False
+                                    self.actualizar_estado_sensores()
                                 sensor_socket.send('ACK'.encode())
-                                print(f"[Taxi] Estado del sensor actualizado: {self.sensor_status}")
+                                #print(f"[Taxi] Estado del sensor actualizado: {self.sensor_status}")
                             else:
                                 sensor_socket.send('NACK'.encode())
                         else:
@@ -62,10 +78,14 @@ class EC_DE:
                 else:
                     break
             except Exception as e:
-                print(f"[Taxi] Error en la conexión con el sensor: {e}")
+                print(f"[Taxi - {self.id_taxi}] Error en la conexión con el sensor: {e}")
                 break
             
         self.sensor_status = 'CONTINGENCY'
+    
+    def actualizar_estado_sensores(self):
+        self.parar_taxi = any(self.estado_sensores.values())
+        #print(f"[Taxi] Estado de los sensores actualizado. Parar taxi: {self.parar_taxi}")
 
     def calcular_lrc(self, data):
         lrc = 0
@@ -81,13 +101,13 @@ class EC_DE:
         self.socket_de = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         try:
             self.socket_de.connect((self.central_ip, self.central_puerto))
-            print("[Taxi] Conectándose al EC_Central.")
+            print(f"[Taxi - {self.id_taxi}] Conectándose al EC_Central.")
             # Inicio del envío de datos
             threading.Thread(target=self.enviar_datos, daemon=True).start()
         except ConnectionRefusedError:
-            print(f"[Taxi] No se pudo conectar al EC_Central en {self.ip_engine}:{self.puerto_engine}. Asegúrate de que EC_Central esté en ejecución.")
+            print(f"[Taxi - {self.id_taxi}] No se pudo conectar al EC_Central en {self.ip_engine}:{self.puerto_engine}. Asegúrate de que EC_Central esté en ejecución.")
         except Exception as e:
-            print(f"[Taxi] Ocurrió un error al intentar conectarse: {e}")
+            print(f"[Taxi - {self.id_taxi}] Ocurrió un error al intentar conectarse: {e}")
             exit(1)
 
     def enviar_datos(self):
@@ -102,27 +122,95 @@ class EC_DE:
             # Esperar ACK
             respuesta = self.socket_de.recv(1024).decode()
             if respuesta != 'ACK':
-                print(f"[Taxi] Error al autenticar taxi.")
+                print(f"[Taxi - {self.id_taxi}] Error al autenticar taxi.")
                 exit(1)
             else:
-                print(f"[Taxi] Taxi autenticado con exito.")
+                print(f"[Taxi - {self.id_taxi}] Taxi autenticado con exito.")
+                threading.Thread(target=self.escuchar_instrucciones, daemon=True).start()
         except Exception as e:
-            print(f"[Taxi] Error al enviar estado del sensor: {e}")
+            print(f"[Taxi - {self.id_taxi}] Error al enviar estado del sensor: {e}")
 
     def reconectar_central(self):
         while not self.conectado_central:
             try:
                 self.socket_central = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
                 self.socket_central.connect((self.central_ip, self.central_puerto))
-                print("[EC_DE] Reconectado a EC_Central.")
+                print(f"[Taxi - {self.id_taxi}] Reconectado a EC_Central.")
                 self.conectado_central = True
-                self.autenticar()
+                #self.autenticar()
+                time.sleep(5)
                 # Reanudar escuchando instrucciones
                 threading.Thread(target=self.escuchar_instrucciones, daemon=True).start()
             except Exception as e:
-                print(f"[EC_DE] No se pudo reconectar a EC_Central: {e}")
+                print(f"[Taxi - {self.id_taxi}] No se pudo reconectar a EC_Central: {e}")
                 time.sleep(5)
-    
+
+    def enviar_estado_central(self):
+        if self.parar_taxi:
+            estado = 'BLOQUEADO'
+        else:
+            estado = 'OK'
+
+        mensaje = {
+            'taxi_id': self.id_taxi,
+            'estado': estado,
+            'posicion': self.posicion
+        }
+
+        try:
+            print(f"[Taxi - {self.id_taxi}] Enviando estado a la Central: {mensaje}")
+            self.producer.send('taxi_estado', key=self.id_taxi.encode(), value=json.dumps(mensaje).encode())
+            self.producer.flush()
+            print(f"[Taxi - {self.id_taxi}] Estado enviado a la Central: {mensaje}")
+        except Exception as e:
+            print(f"[Taxi - {self.id_taxi}] Error al enviar estado a la Central: {e}")
+            self.reconectar_central()
+
+    def calcular_siguiente_posicion(self, destino):
+        x, y = self.posicion
+        destino_x, destino_y = destino
+
+        if x < destino_x:
+            x += 1
+        elif x > destino_x:
+            x -= 1
+
+        if y < destino_y:
+            y += 1
+        elif y > destino_y:
+            y -= 1
+
+        print(f"[Taxi - {self.id_taxi}] Moviendo de {self.posicion} a ({x}, {y})")
+
+        self.posicion = (x, y)
+        print(f"[Taxi - {self.id_taxi}] Nueva posición: {self.posicion}")
+        
+        # Enviar estado a la Central después de mover
+        self.enviar_estado_central()
+        time.sleep(5)
+
+    def mover_destino(self, instruccion):
+        print(f"holiwis taxi")
+        while self.posicion != instruccion['destino']:
+            print(f"holiwis taxi2")
+            if self.parar_taxi == True:
+                print(f"holiwis taxi3")
+                self.enviar_estado_central()
+            else:
+                print(f"[Taxi - {self.id_taxi}] Moviendo hacia destino: {instruccion['destino']}")
+                self.calcular_siguiente_posicion(instruccion['destino'])
+
+    def escuchar_instrucciones(self):
+        print(f"[Taxi - {self.id_taxi}] Escuchando instrucciones de taxi...")
+        for mensaje in self.consumerTaxi:
+            try:
+                if self.id_taxi == mensaje.key.decode():
+                    instruccion = json.loads(mensaje.value.decode())
+                    print(f"[Taxi - {self.id_taxi}] Instrucción recibida: {instruccion}")
+                    self.mover_destino(instruccion)
+            except Exception as e:
+                print(f"[Taxi - {self.id_taxi}] Error al procesar instrucción: {e}")
+
 if __name__ == "__main__":
     try:
         parser = argparse.ArgumentParser(description="Ejecutar EC_DE con parámetros de conexión y autenticación.")
