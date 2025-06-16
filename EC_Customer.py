@@ -11,7 +11,7 @@ class EC_Customer:
         self.broker_ip = broker_ip
         self.broker_puerto = brocker_puerto
         self.requests_path = requests_path
-        self.posicion = (20, 20)
+        self.posicion = (8, 8)
         self.producer = KafkaProducer(bootstrap_servers=[self.broker_ip])
         self.consumer = KafkaConsumer(
             'cliente_respuesta',
@@ -68,10 +68,10 @@ class EC_Customer:
 
     def recibir_respuestas(self):
         self.log(f"[Cliente {self.cliente_id}] Esperando respuestas...")
-        start_time = time.time()
-        timeout = 120
 
         while True:
+            start_time = time.time()
+            timeout = 120
             if time.time() - start_time > timeout:
                 self.log(f"[Cliente {self.cliente_id}] Tiempo de espera agotado para respuestas.")
                 break
@@ -89,6 +89,7 @@ class EC_Customer:
                         self.log(f"[Cliente {self.cliente_id}] Solicitud procesada correctamente. Un taxi esta en camino.")
                         # Ahora sí eliminamos la solicitud con éxito
                         self.solicitudes_pendientes.pop(0)
+                        self.log(f"[Cliente {self.cliente_id}] Solicitudes cargadas: {self.solicitudes_pendientes}")
                     elif status == 'KO':
                         self.log(f"[Cliente {self.cliente_id}] Error al procesar la solicitud. No hay taxis disponibles.")
                         self.solicitud_enviada = False
@@ -99,7 +100,10 @@ class EC_Customer:
                         self.log(f"[Cliente {self.cliente_id}] Cliente recogido, llegando a su destino.")
                     elif status == 'DESTINO':
                         self.log(f"[Cliente {self.cliente_id}] Cliente ha llegado a su destino.")
+                        posicion = respuesta.get('posicion')
+                        self.posicion = tuple(posicion)
                         self.solicitud_enviada = False
+                        print(f"Cliente {self.cliente_id} ha llegado a su destino en {self.posicion}.")
                         self.log(f"[Cliente {self.cliente_id}] 4 segundos para el siguiente movimiento.")
                         time.sleep(4)
                         self.enviar_mensaje()

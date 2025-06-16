@@ -187,18 +187,28 @@ class EC_DE:
         
         # Enviar estado a la Central después de mover
         self.enviar_estado_central()
-        time.sleep(5)
+        time.sleep(2)
 
     def mover_destino(self, instruccion):
-        print(f"holiwis taxi")
-        while self.posicion != instruccion['destino']:
-            print(f"holiwis taxi2")
-            if self.parar_taxi == True:
-                print(f"holiwis taxi3")
-                self.enviar_estado_central()
-            else:
-                print(f"[Taxi - {self.id_taxi}] Moviendo hacia destino: {instruccion['destino']}")
-                self.calcular_siguiente_posicion(instruccion['destino'])
+        try:
+            print(f"---> self.posicion: {self.posicion}")
+            print(f"---> Instruccion destino: {instruccion['destino']}")
+            while self.posicion != tuple(instruccion['destino']):
+                print(f"---> self.posicion: {self.posicion}")
+                print(f"---> Instruccion destino: {instruccion['destino']}")
+                if self.parar_taxi == True:
+                    time.sleep(2)
+                    self.enviar_estado_central()
+                else:
+                    print(f"[Taxi - {self.id_taxi}] Moviendo hacia destino: {instruccion['destino']}")
+                    self.calcular_siguiente_posicion(instruccion['destino'])
+            print(f"[Taxi - {self.id_taxi}] Taxi ha llegado a su destino: {instruccion['destino']}")
+            self.enviar_estado_central()
+            return True
+        except Exception as e:
+            print(f"[Taxi - {self.id_taxi}] Error al mover hacia destino: {e}")
+            self.enviar_estado_central()
+            self.reconectar_central()
 
     def escuchar_instrucciones(self):
         print(f"[Taxi - {self.id_taxi}] Escuchando instrucciones de taxi...")

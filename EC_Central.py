@@ -26,7 +26,6 @@ class EC_Central:
     def iniciar_servidor(self):
         threading.Thread(target=self.iniciar_servidor_taxis, daemon=True).start()
         threading.Thread(target=self.procesar_solicitudes_cliente, daemon=True).start()
-        threading.Thread(target=self.recibir_estado_taxi, daemon=True).start() 
 
     def iniciar_servidor_taxis(self):
         self.servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -61,8 +60,8 @@ class EC_Central:
                 print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
                 if taxi_id:
                     print(f"Holiwis2")
+                    self.enviar_mensaje_cliente(cliente_id, 'OK')
                     self.llevar_taxi_a_cliente(taxi_id, cliente_id, destino_coord, origen_coord)
-                    self.enviar_mensaje_cliente(cliente_id, 'Taxi asignado')
                 else:
                     self.enviar_mensaje_cliente(cliente_id, 'KO')
             except json.JSONDecodeError as e:
@@ -155,19 +154,25 @@ class EC_Central:
                 print(f"[EC_Central] Error en la conexión con el taxi: {e}")
                 break
 
-    def recibir_estado_taxi(self):
+    def recibir_estado_taxi(self, destino):
         print(f"Holiwis34")
-        for mensaje in self.consumerTaxiEstado:
-            print(f"[EC_Central] Mensaje recibido de taxi_estado: {mensaje.value.decode()}")
-            if mensaje.key.decode() in self.taxis_disponibles:
-                print(f"[EC_Central] Actualizando estado del taxi {mensaje.key.decode()}")
-                solicitud = json.loads(mensaje)
-                id_taxi_estado = solicitud['taxi_id']
-                taxi_estado = solicitud['estado']
-                taxi_posicion = solicitud['posicion']
-                self.taxis_disponibles[id_taxi_estado]['estado'] = taxi_estado
-                self.taxis_disponibles[id_taxi_estado]['posicion'] = taxi_posicion
-                print(f"[EC_Central] Estado del taxi {id_taxi_estado} actualizado: {taxi_estado}, Posición: {taxi_posicion}")
+        try:
+            for mensaje in self.consumerTaxiEstado:
+                print(f"[EC_Central] Mensaje recibido de taxi_estado: {mensaje.value.decode()}")
+                if mensaje.key.decode() in self.taxis_disponibles:
+                    print(f"[EC_Central] Actualizando estado del taxi {mensaje.key.decode()}")
+                    solicitud = json.loads(mensaje.value.decode())
+                    id_taxi_estado = solicitud['taxi_id']
+                    taxi_estado = solicitud['estado']
+                    taxi_posicion = solicitud['posicion']
+                    self.taxis_disponibles[id_taxi_estado]['estado'] = taxi_estado
+                    self.taxis_disponibles[id_taxi_estado]['posicion'] = taxi_posicion
+                    print(f"[EC_Central] Estado del taxi {id_taxi_estado} actualizado: {taxi_estado}, Posición: {taxi_posicion}")
+                    if tuple(taxi_posicion) == tuple(destino):
+                        print(f"[EC_Central] Taxi {id_taxi_estado} ha llegado a su destino {destino}.")
+                        return True
+        except Exception as e:
+            print(f"[EC_Central] Error al recibir estado del taxi: {e}")
 
 
     def calcular_lrc(self, data):
@@ -224,6 +229,16 @@ class EC_Central:
         self.producer.send('cliente_respuesta', key=id_cliente.encode(),value=json.dumps(mensaje).encode())
         print(f"[EC_Central] Enviada respuesta al cliente {id_cliente}: {estado}")
 
+    def enviar_mensaje_cliente_final(self, id_cliente, estado, posicion):
+        time.sleep(0.5)
+        mensaje = {
+            'cliente_id': id_cliente,
+            'estado': estado,
+            'posicion': posicion
+        }
+        self.producer.send('cliente_respuesta', key=id_cliente.encode(), value=json.dumps(mensaje).encode())
+        print(f"[EC_Central] Enviada respuesta final al cliente {id_cliente}: {estado}, Posición: {posicion}")
+
     def unir_taxi_cliente(self, cliente_id, destino_coord):
         for taxi_id, taxi_info in self.taxis_autenticados.items():
             if taxi_info.get('estado', 'FREE') == 'FREE':
@@ -245,15 +260,19 @@ class EC_Central:
             taxi_info['estado'] = 'RUN'
             self.actualizar_mapa = True
             self.enviar_instrucciones_taxi(taxi_id, cliente_origen)
-            time.sleep(20)
+            self.recibir_estado_taxi(cliente_origen)
             # Una vez en el origen, cambia el estado del cliente a "RECOGIDO"
             taxi_info['estado'] = 'BUSY'
             print(f"Taxi {taxi_id} ha llegado a {cliente_origen} para recoger al cliente.")
+            self.enviar_mensaje_cliente(cliente_id, 'RECOGIDO')
+            print(f"Enviado mensaje recogido al cliente")
             self.actualizar_tabla = True
-            time.sleep(20)
             # Instrucciones para llevar al cliente al destino
             print(f"Taxi {taxi_id} llevando al cliente {cliente_id} a {destino}.")
-            self.enviar_instrucciones_taxi(taxi_id, destino)
+            self.enviar_instrucciones_taxi(taxi_id, self.localizaciones[destino])
+            self.recibir_estado_taxi(self.localizaciones[destino])
+            taxi_info['estado'] = 'FREE'
+            self.enviar_mensaje_cliente_final(cliente_id, 'DESTINO', self.localizaciones[destino])
 
         else:
             print(f"[CENTRAL] No se pudo enviar taxi {taxi_id} al cliente {cliente_id}.")
