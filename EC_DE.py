@@ -17,7 +17,7 @@ class EC_DE:
         self.id_taxi = id_taxi
         self.estado_sensores = {}
         self.parar_taxi = False  # Indica si el taxi debe detenerse
-        self.posicion = (1,1)
+        self.posicion = (0,0)
         self.lock = threading.Lock()
         self.sensor_status = 'OK'  # Estado inicial de los sensores
         self.producer = KafkaProducer(bootstrap_servers=[self.broker_ip])

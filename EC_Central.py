@@ -5,6 +5,7 @@ import argparse
 import json
 import kafka
 from kafka import KafkaProducer, KafkaConsumer
+import tkinter as tk
 
 SERVER = socket.gethostbyname(socket.gethostname())
 
@@ -19,6 +20,7 @@ class EC_Central:
         self.lock = threading.Lock()  # Lock para manejar el acceso concurrente a taxis_disponibles y taxis_autenticados
         self.cerrar = False  # Flag para cerrar el servidor
         self.map_path = map_path  # Ruta del mapa de localizaciones
+        self.clientes_activos = {}  # Diccionario para almacenar clientes activos
         self.init_kafka()
         self.cargar_taxis()
         self.iniciar_servidor()
@@ -45,6 +47,96 @@ class EC_Central:
         self.consumerTaxi = kafka.KafkaConsumer('taxi_instrucciones', bootstrap_servers=[self.ip_broker])
         self.consumerTaxiEstado = kafka.KafkaConsumer('taxi_estado', bootstrap_servers=[self.ip_broker])
 
+    def iniciar_interfaz_grafica(self):
+        self.ventana = tk.Tk()
+        self.ventana.title("Estado del sistema EasyCab")
+
+        # Frame para las tablas
+        self.frame_tablas = tk.Frame(self.ventana)
+        self.frame_tablas.pack()
+
+        self.label_taxis = tk.Label(self.frame_tablas, text="Taxis", font=("Arial", 10, "bold"))
+        self.label_taxis.grid(row=0, column=0)
+
+        self.label_clientes = tk.Label(self.frame_tablas, text="Clientes", font=("Arial", 10, "bold"))
+        self.label_clientes.grid(row=0, column=1)
+
+        self.text_taxis = tk.Text(self.frame_tablas, height=7, width=40)
+        self.text_taxis.grid(row=1, column=0)
+
+        self.text_clientes = tk.Text(self.frame_tablas, height=7, width=40)
+        self.text_clientes.grid(row=1, column=1)
+
+        self.canvas = tk.Canvas(self.ventana, width=400, height=400, bg="white")
+        self.canvas.pack()
+
+        self.cuadros = {}
+        self.actualizar_grafico()
+
+        # Ejecutar en un hilo aparte para no bloquear el programa principal
+        #threading.Thread(target=self.ventana.mainloop, daemon=True).start()
+
+    def actualizar_grafico(self):
+        self.canvas.delete("all")
+        tam = 20  # tamaño de cada celda
+
+        for i in range(20):
+            for j in range(20):
+                x0, y0 = j * tam, i * tam
+                x1, y1 = x0 + tam, y0 + tam
+                self.canvas.create_rectangle(x0, y0, x1, y1, outline="gray")
+
+                # Mostrar localización si existe
+                contenido = self.mapa[i][j]
+                if isinstance(contenido, str):  # A, B, C...
+                    self.canvas.create_text(x0 + 10, y0 + 10, text=contenido, fill="black", font=("Arial", 8))
+
+        # Mostrar taxis autenticados
+        with self.lock:
+            for taxi_id, info in self.taxis_autenticados.items():
+                if 'posicion' in info:
+                    x, y = info['posicion']
+                    # Celdas azules para taxis
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill="blue")
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(taxi_id), fill="white", font=("Arial", 8))
+
+        with self.lock:
+            for cliente_id, pos in self.clientes_activos.items():
+                if 'origen' in pos:
+                    origen = pos['origen']
+                    x, y = origen
+                    # Celdas verdes para clientes
+                    canvas_x = y * tam
+                    canvas_y = x * tam
+                    self.canvas.create_rectangle(canvas_x, canvas_y, canvas_x + tam, canvas_y + tam, fill="green")
+                    self.canvas.create_text(canvas_x + 10, canvas_y + 10, text=str(cliente_id), fill="white", font=("Arial", 8))
+        
+                # Actualizar tabla de taxis
+        self.text_taxis.delete('1.0', tk.END)
+        self.text_taxis.insert(tk.END, "Id\tDestino\tEstado\n")
+        with self.lock:
+            for taxi_id, info in self.taxis_autenticados.items():
+                destino = info.get("destino", "")
+                estado = info.get("estado_taxi", "")
+                self.text_taxis.insert(tk.END, f"{taxi_id}\t{destino}\tOK. Servicio {destino}\n")
+
+        # Actualizar tabla de clientes
+        self.text_clientes.delete('1.0', tk.END)
+        self.text_clientes.insert(tk.END, "Id\tDestino\tEstado\n")
+        with self.lock:
+            for cliente_id, info in self.clientes_activos.items():
+                destino = info.get("destino", "")
+                taxi_asignado = ""
+                for t_id, t_info in self.taxis_autenticados.items():
+                    if t_info.get("cliente") == cliente_id:
+                        taxi_asignado = f"Taxi {t_id}"
+                        break
+                self.text_clientes.insert(tk.END, f"{cliente_id}\t{destino}\tOK. {taxi_asignado}\n")
+
+        
+        # Llama a sí mismo cada 1000 ms
+        self.ventana.after(1000, self.actualizar_grafico)
+
     def procesar_solicitudes_cliente(self):
         for mensaje in self.consumerSol:
             mensaje = mensaje.value.decode()
@@ -54,6 +146,13 @@ class EC_Central:
                 cliente_id = solicitud['cliente_id']
                 destino_coord = solicitud['destino']
                 origen_coord = solicitud['origen']
+
+                if cliente_id not in self.clientes_activos:
+                    print(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                    self.clientes_activos[cliente_id] = {
+                        'destino': destino_coord,
+                        'origen': origen_coord
+                    }
 
                 print(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
     
@@ -65,8 +164,10 @@ class EC_Central:
                     threading.Thread(target=self.llevar_taxi_a_cliente, args=(taxi_id, cliente_id, destino_coord, origen_coord), daemon=True).start()
                 else:
                     self.enviar_mensaje_cliente(cliente_id, 'KO')
+                    del self.clientes_activos[cliente_id]  # Eliminar cliente si no hay taxi disponible
             except json.JSONDecodeError as e:
                 print(f"[EC_Central] Error al procesar el mensaje: {e}")
+                del self.clientes_activos[cliente_id]  # Eliminar cliente si hay error en el mensaje
 
     def cargar_mapa(self):
         try:
@@ -96,6 +197,11 @@ class EC_Central:
                         self.taxis_autenticados[taxi_id]['estado_sensor'] = estado
                         self.taxis_autenticados[taxi_id]['posicion'] = posicion
                         print(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
+
+                        cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
+                        if cliente_id and cliente_id in self.clientes_activos and self.taxis_autenticados[taxi_id]['estado_taxi'] == 'BUSY':
+                            self.clientes_activos[cliente_id]['origen'] = posicion
+
             except Exception as e:
                 print(f"[EC_Central] Error procesando mensaje de taxi_estado: {e}")
 
@@ -110,7 +216,6 @@ class EC_Central:
             time.sleep(0.5)
         print(f"[EC_Central] Tiempo de espera agotado para el taxi {taxi_id} en destino {destino}")
         return False
-
 
     def cargar_localizaciones(self):
         # Lee el archivo EC_locations.json y carga las localizaciones en el mapa
@@ -170,9 +275,21 @@ class EC_Central:
                     break
             except ConnectionResetError:
                 if autenticado_en_esta_sesion and id_taxi_auth in self.taxis_autenticados:
-                    #del self.taxis_autenticados[id_taxi_auth]
-                    #del self.taxis_disponibles[id_taxi_auth]
+                    del self.taxis_autenticados[id_taxi_auth]
+                    
+                        # Restablecer valores del taxi en taxis_disponibles
+                    if id_taxi_auth in self.taxis_disponibles:
+                        self.taxis_disponibles[id_taxi_auth] = {
+                            'estado_taxi': 'FREE',
+                            'estado_sensor': 'OK',
+                            'posicion': [0, 0],  # o lo que consideres como posición inicial
+                            'destino': None,
+                            'cliente': None
+                        }
+                        print(f"[EC_Central] Taxi {id_taxi_auth} reseteado en taxis_disponibles.")
+
                     print(f"[EC_Central] Conexión con el taxi {id_taxi_auth}:{direccion} perdida.")
+                    print(f"[EC_Central] Taxi {id_taxi_auth} eliminado de taxis autenticados.")
                     autenticado_en_esta_sesion = False
                     taxi_socket.close()
                 else:
@@ -202,7 +319,7 @@ class EC_Central:
                 for taxi in taxis_data:
                     taxi_id = taxi['id']
                     estado = taxi['estado']
-                    posicion = taxi.get('posicion', [1, 1])
+                    posicion = taxi.get('posicion', [0, 0])
 
                     # Validar estado
                     if estado not in ['FREE', 'BUSY', 'STOPPED', 'END',]:
@@ -278,6 +395,7 @@ class EC_Central:
             # Una vez en el origen, cambia el estado del cliente a "RECOGIDO"
             with self.lock:
                 taxi_info['estado_taxi'] = 'BUSY'
+                self.clientes_activos[cliente_id]['en_taxi'] = True
             print(f"Taxi {taxi_id} ha llegado a {cliente_origen} para recoger al cliente.")
             self.enviar_mensaje_cliente(cliente_id, 'RECOGIDO')
             print(f"Enviado mensaje recogido al cliente")
@@ -324,8 +442,14 @@ if __name__ == "__main__":
 
     ec_central.cargar_localizaciones()  
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("[EC_Central] Programa finalizado por el usuario.")
+    # Esto se debe ejecutar en el hilo principal
+    ec_central.iniciar_interfaz_grafica()
+
+    # mainloop bloquea, por eso debe ir aquí
+    ec_central.ventana.mainloop()
+
+    #try:
+    #    while True:
+    #        time.sleep(1)
+    #except KeyboardInterrupt:
+    #    print("[EC_Central] Programa finalizado por el usuario.")
