@@ -51,7 +51,6 @@ class EC_Central:
         self.ventana = tk.Tk()
         self.ventana.title("Estado del sistema EasyCab")
 
-        # Frame para las tablas
         self.frame_tablas = tk.Frame(self.ventana)
         self.frame_tablas.pack()
 
@@ -73,56 +72,50 @@ class EC_Central:
         self.cuadros = {}
         self.actualizar_grafico()
 
-        # Ejecutar en un hilo aparte para no bloquear el programa principal
-        #threading.Thread(target=self.ventana.mainloop, daemon=True).start()
-
     def actualizar_grafico(self):
         self.canvas.delete("all")
-        tam = 20  # tamaño de cada celda
+        tam = 20
 
         for i in range(20):
             for j in range(20):
                 x0, y0 = j * tam, i * tam
                 x1, y1 = x0 + tam, y0 + tam
-                self.canvas.create_rectangle(x0, y0, x1, y1, outline="gray")
-
-                # Mostrar localización si existe
                 contenido = self.mapa[i][j]
-                if isinstance(contenido, str):  # A, B, C...
-                    self.canvas.create_text(x0 + 10, y0 + 10, text=contenido, fill="black", font=("Arial", 8))
-
-        # Mostrar taxis autenticados
-        with self.lock:
-            for taxi_id, info in self.taxis_autenticados.items():
-                if 'posicion' in info:
-                    x, y = info['posicion']
-                    # Celdas azules para taxis
-                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill="blue")
-                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(taxi_id), fill="white", font=("Arial", 8))
+                if isinstance(contenido, str) and contenido.isupper():
+                    self.canvas.create_rectangle(x0, y0, x1, y1, fill="blue", outline="gray")
+                    self.canvas.create_text(x0 + 10, y0 + 10, text=contenido, fill="white", font=("Arial", 8))
+                else:
+                    self.canvas.create_rectangle(x0, y0, x1, y1, outline="gray")
 
         with self.lock:
+
             for cliente_id, pos in self.clientes_activos.items():
                 if 'origen' in pos:
                     origen = pos['origen']
                     x, y = origen
-                    # Celdas verdes para clientes
-                    canvas_x = y * tam
-                    canvas_y = x * tam
-                    self.canvas.create_rectangle(canvas_x, canvas_y, canvas_x + tam, canvas_y + tam, fill="green")
-                    self.canvas.create_text(canvas_x + 10, canvas_y + 10, text=str(cliente_id), fill="white", font=("Arial", 8))
-        
-                # Actualizar tabla de taxis
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill="yellow")
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(cliente_id).lower(), fill="black", font=("Arial", 8))
+
+
+            for taxi_id, info in self.taxis_autenticados.items():
+                if 'posicion' in info:
+                    x, y = info['posicion']
+                    estado_sensor = info.get("estado_sensor")
+                    estado_taxi = info.get("estado_taxi")
+                    if estado_sensor != "OK" or estado_taxi == "FREE":
+                        color = "red"
+                    else:
+                        color = "green"
+
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill=color)
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(taxi_id), fill="white", font=("Arial", 8))
+
         self.text_taxis.delete('1.0', tk.END)
         self.text_taxis.insert(tk.END, "Id\tDestino\tEstado\n")
-        with self.lock:
-            for taxi_id, info in self.taxis_autenticados.items():
-                destino = info.get("destino", "")
-                estado = info.get("estado_taxi", "")
-                self.text_taxis.insert(tk.END, f"{taxi_id}\t{destino}\tOK. Servicio {destino}\n")
 
-        # Actualizar tabla de clientes
         self.text_clientes.delete('1.0', tk.END)
         self.text_clientes.insert(tk.END, "Id\tDestino\tEstado\n")
+
         with self.lock:
             for cliente_id, info in self.clientes_activos.items():
                 destino = info.get("destino", "")
@@ -131,12 +124,17 @@ class EC_Central:
                     if t_info.get("cliente") == cliente_id:
                         taxi_asignado = f"Taxi {t_id}"
                         break
-                self.text_clientes.insert(tk.END, f"{cliente_id}\t{destino}\tOK. {taxi_asignado}\n")
+                self.text_clientes.insert(tk.END, f"{cliente_id}\t{destino}\t{info.get("estado")}. {taxi_asignado}\n")
+
+        with self.lock:
+            for taxi_id, info in self.taxis_autenticados.items():
+                destino = info.get("destino", "")
+                estado = info.get("estado_taxi", "")
+                self.text_taxis.insert(tk.END, f"{taxi_id}\t{destino}\t{info.get("estado_sensor")}. Servicio {destino}\n")
 
         
-        # Llama a sí mismo cada 1000 ms
         self.ventana.after(1000, self.actualizar_grafico)
-
+        
     def procesar_solicitudes_cliente(self):
         for mensaje in self.consumerSol:
             mensaje = mensaje.value.decode()
@@ -151,20 +149,30 @@ class EC_Central:
                     print(f"Posicion del cliente {cliente_id}: {origen_coord}")
                     self.clientes_activos[cliente_id] = {
                         'destino': destino_coord,
-                        'origen': origen_coord
+                        'origen': origen_coord,
+                        'estado': 'OK'
+                    }
+                else:
+                    print(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                    self.clientes_activos[cliente_id] = {
+                        'destino': destino_coord,
+                        'origen': origen_coord,
+                        'estado': self.clientes_activos[cliente_id]["estado"]
                     }
 
                 print(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
     
                 taxi_id = self.unir_taxi_cliente(cliente_id, destino_coord)
-                print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
                 if taxi_id:
                     self.enviar_mensaje_cliente(cliente_id, 'OK')
                     #self.llevar_taxi_a_cliente(taxi_id, cliente_id, destino_coord, origen_coord)
+                    self.clientes_activos[cliente_id]["estado"] = 'OK'
                     threading.Thread(target=self.llevar_taxi_a_cliente, args=(taxi_id, cliente_id, destino_coord, origen_coord), daemon=True).start()
                 else:
+                    print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
                     self.enviar_mensaje_cliente(cliente_id, 'KO')
-                    del self.clientes_activos[cliente_id]  # Eliminar cliente si no hay taxi disponible
+                    self.clientes_activos[cliente_id]["estado"] = 'ESPERA'
+                    #del self.clientes_activos[cliente_id]  # Eliminar cliente si no hay taxi disponible
             except json.JSONDecodeError as e:
                 print(f"[EC_Central] Error al procesar el mensaje: {e}")
                 del self.clientes_activos[cliente_id]  # Eliminar cliente si hay error en el mensaje
