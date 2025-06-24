@@ -3,6 +3,7 @@ import threading
 import time
 import json
 import argparse
+import tkinter as tk
 import kafka
 from kafka import KafkaProducer, KafkaConsumer
 
@@ -18,6 +19,9 @@ class EC_DE:
         self.estado_sensores = {}
         self.parar_taxi = False  # Indica si el taxi debe detenerse
         self.posicion = (0,0)
+        self.mapa = [[0 for _ in range(20)] for _ in range(20)]
+        self.taxis = {}
+        self.clientes = {}
         self.lock = threading.Lock()
         self.sensor_status = 'OK'  # Estado inicial de los sensores
         self.producer = KafkaProducer(bootstrap_servers=[self.broker_ip])
@@ -25,7 +29,116 @@ class EC_DE:
 
         self.inicio_sensores()
         self.conectar_de()
+        self.consumer_estado = KafkaConsumer('mapa_estado', bootstrap_servers=[self.broker_ip])
+        threading.Thread(target=self.recibir_estado_global, daemon=True).start()   
+    
+    def iniciar_interfaz_grafica(self):
+        print("[DEBUG] Entrando a iniciar_interfaz_grafica")
+        self.ventana = tk.Tk()
+        self.ventana.title("Estado del sistema EasyCab")
 
+        self.frame_tablas = tk.Frame(self.ventana)
+        self.frame_tablas.pack()
+
+        self.label_taxis = tk.Label(self.frame_tablas, text="Taxis", font=("Arial", 10, "bold"))
+        self.label_taxis.grid(row=0, column=0)
+
+        self.label_clientes = tk.Label(self.frame_tablas, text="Clientes", font=("Arial", 10, "bold"))
+        self.label_clientes.grid(row=0, column=1)
+
+        self.text_taxis = tk.Text(self.frame_tablas, height=7, width=40)
+        self.text_taxis.grid(row=1, column=0)
+
+        self.text_clientes = tk.Text(self.frame_tablas, height=7, width=40)
+        self.text_clientes.grid(row=1, column=1)
+
+        self.canvas = tk.Canvas(self.ventana, width=400, height=400, bg="white")
+        self.canvas.pack()
+
+        self.cuadros = {}
+        self.actualizar_grafico()
+        print("[DEBUG] GUI inicializada correctamente")
+
+    def recibir_estado_global(self):
+        time.sleep(3)
+        for mensaje in self.consumer_estado:
+            try:
+                estado = json.loads(mensaje.value.decode())
+                with self.lock:
+                    self.taxis_autenticados = estado.get("taxis", {})
+                    self.clientes_activos = estado.get("clientes", {})
+                    self.mapa = estado.get("mapa", [])
+            except Exception as e:
+                print(f"Error recibiendo estado global: {e}")
+
+
+    def actualizar_grafico(self):
+
+        if not hasattr(self, 'clientes_activos') or not hasattr(self, 'taxis_autenticados'):# Esperar hasta que los atributos esten listos
+            self.ventana.after(500, self.actualizar_grafico)
+            return
+
+        self.canvas.delete("all")
+        tam = 20
+
+        for i in range(20):
+            for j in range(20):
+                x0, y0 = j * tam, i * tam
+                x1, y1 = x0 + tam, y0 + tam
+                contenido = self.mapa[i][j]
+                if isinstance(contenido, str) and contenido.isupper():
+                    self.canvas.create_rectangle(x0, y0, x1, y1, fill="blue", outline="gray")
+                    self.canvas.create_text(x0 + 10, y0 + 10, text=contenido, fill="white", font=("Arial", 8))
+                else:
+                    self.canvas.create_rectangle(x0, y0, x1, y1, outline="gray")
+
+        with self.lock:
+
+            for cliente_id, pos in self.clientes_activos.items():
+                if 'origen' in pos:
+                    origen = pos['origen']
+                    x, y = origen
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill="yellow")
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(cliente_id).lower(), fill="black", font=("Arial", 8))
+
+
+            for taxi_id, info in self.taxis_autenticados.items():
+                if 'posicion' in info:
+                    x, y = info['posicion']
+                    estado_sensor = info.get("estado_sensor")
+                    estado_taxi = info.get("estado_taxi")
+                    if estado_sensor != "OK" or estado_taxi == "FREE":
+                        color = "red"
+                    else:
+                        color = "green"
+
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill=color)
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(taxi_id), fill="white", font=("Arial", 8))
+
+        self.text_taxis.delete('1.0', tk.END)
+        self.text_taxis.insert(tk.END, "Id\tDestino\tEstado\n")
+
+        self.text_clientes.delete('1.0', tk.END)
+        self.text_clientes.insert(tk.END, "Id\tDestino\tEstado\n")
+
+        with self.lock:
+            for cliente_id, info in self.clientes_activos.items():
+                destino = info.get("destino", "")
+                taxi_asignado = ""
+                for t_id, t_info in self.taxis_autenticados.items():
+                    if t_info.get("cliente") == cliente_id:
+                        taxi_asignado = f"Taxi {t_id}"
+                        break
+                self.text_clientes.insert(tk.END, f"{cliente_id}\t{destino}\t{info.get("estado")}. {taxi_asignado}\n")
+
+        with self.lock:
+            for taxi_id, info in self.taxis_autenticados.items():
+                destino = info.get("destino", "")
+                estado = info.get("estado_taxi", "")
+                self.text_taxis.insert(tk.END, f"{taxi_id}\t{destino}\t{info.get("estado_sensor")}. Servicio {destino}\n")
+
+        
+        self.ventana.after(1000, self.actualizar_grafico)
 
     def inicio_sensores(self):
         threading.Thread(target=self.iniciar_servidor_sensores, daemon=True).start()
@@ -112,7 +225,7 @@ class EC_DE:
 
     def enviar_datos(self):
 
-        data = f'TAXI#{id_taxi}'
+        data = f'TAXI#{self.id_taxi}'
         lrc = self.calcular_lrc(data)
         mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
 
@@ -243,25 +356,33 @@ if __name__ == "__main__":
         broker_ip = args.broker_ip
         broker_puerto = args.broker_puerto
         id_taxi = args.id_taxi
-
+        print(f"hola caracola")
         ec_de = EC_DE(id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto)
-
-        try:
-            while True:
-                time.sleep(1)
-        except KeyboardInterrupt:
-            print("[Taxi] Programa finalizado por el usuario.")
-            ec_de.servidor_sensores.close()
+        print(f"hola caracola2")
+        # Esto se debe ejecutar en el hilo principal
+        ec_de.iniciar_interfaz_grafica()
+        print(f"hola caracola3")
+        # mainloop bloquea, por eso debe ir aquí
+        ec_de.ventana.mainloop()
+        print(f"hola caracola4")
+        #try:
+        #    while True:
+        #        time.sleep(1)
+        #except KeyboardInterrupt:
+        #    print("[Taxi] Programa finalizado por el usuario.")
+        #    ec_de.servidor_sensores.close()
         
     except Exception as e:
         try:
-            data = f'ERROR_TAXI#{id_taxi}'
-            lrc = ec_de.calcular_lrc(data)
-            mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
-            mensaje = "<STX>ERROR_TAXI<ETX><LRC>0"
-            ec_de.socket_de.send(mensaje.encode())
-            print("[Taxi] Error inesperado, se notificó a la Central.")
-        except:
-            print("[Taxi] Error fatal y no se pudo notificar a la Central.")
+            if 'ec_de' in locals():
+                data = f'ERROR_TAXI#{id_taxi}'
+                lrc = ec_de.calcular_lrc(data)
+                mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
+                ec_de.socket_de.send(mensaje.encode())
+                print("[Taxi] Error inesperado, se notificó a la Central.")
+            else:
+                print("[Taxi] Error fatal: EC_DE no fue creado.")
+        except Exception as noti_error:
+            print(f"[Taxi] Error fatal y no se pudo notificar a la Central. Detalle: {noti_error}")
         finally:
             exit(1)

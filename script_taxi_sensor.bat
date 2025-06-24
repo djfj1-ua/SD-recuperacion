@@ -2,8 +2,8 @@
 setlocal EnableDelayedExpansion
 
 :: Configura cuántos taxis y sensores por taxi deseas
-set NUM_TAXIS=3
-set NUM_SENSORES=2
+set NUM_TAXIS=5
+set NUM_SENSORES=1
 
 :: Configuración base
 set SENSORS_IP=127.0.0.1

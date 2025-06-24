@@ -13,16 +13,42 @@ class EC_Customer:
         self.requests_path = requests_path
         self.posicion = (8, 8)
         self.producer = KafkaProducer(bootstrap_servers=[self.broker_ip])
-        self.consumer = KafkaConsumer(
-            'cliente_respuesta',
-            bootstrap_servers=[self.broker_ip],
-            #group_id=f'cliente_{cliente_id}', 
-            #auto_offset_reset='earliest'
-        )
+        self.consumer = KafkaConsumer('cliente_respuesta', bootstrap_servers=[self.broker_ip])
+        self.consumer_estado = KafkaConsumer('mapa_estado', bootstrap_servers=[self.broker_ip])
         self.cliente_id = cliente_id
+        self.mapa = [[0 for _ in range(20)] for _ in range(20)]
+        self.taxis = {}
+        self.clientes = {}
+        self.lock = threading.Lock()
         self.solicitudes_pendientes = {}
         self.solicitud_enviada = False
         self.cargar_movimientos()
+        threading.Thread(target=self.recibir_estado_global, daemon=True).start()
+    
+    def iniciar_interfaz_grafica(self):
+        self.ventana = tk.Tk()
+        self.ventana.title("Estado del sistema EasyCab")
+
+        self.frame_tablas = tk.Frame(self.ventana)
+        self.frame_tablas.pack()
+
+        self.label_taxis = tk.Label(self.frame_tablas, text="Taxis", font=("Arial", 10, "bold"))
+        self.label_taxis.grid(row=0, column=0)
+
+        self.label_clientes = tk.Label(self.frame_tablas, text="Clientes", font=("Arial", 10, "bold"))
+        self.label_clientes.grid(row=0, column=1)
+
+        self.text_taxis = tk.Text(self.frame_tablas, height=7, width=40)
+        self.text_taxis.grid(row=1, column=0)
+
+        self.text_clientes = tk.Text(self.frame_tablas, height=7, width=40)
+        self.text_clientes.grid(row=1, column=1)
+
+        self.canvas = tk.Canvas(self.ventana, width=400, height=400, bg="white")
+        self.canvas.pack()
+
+        self.cuadros = {}
+        self.actualizar_grafico()
 
     def cargar_movimientos(self):
         try:
@@ -43,6 +69,94 @@ class EC_Customer:
         except json.JSONDecodeError:
             print(f"Error al decodificar el archivo {self.requests_path}.")
             return []
+        
+    def escuchar_estado(self):
+        for mensaje in self.consumer:
+            data = json.loads(mensaje.value.decode())
+            self.mapa = data.get("mapa", self.mapa)
+            self.taxis = data.get("taxis", {})
+            self.clientes = data.get("clientes", {})
+
+    def actualizar_grafico(self):
+
+        if not hasattr(self, 'clientes_activos') or not hasattr(self, 'taxis_autenticados'):# Esperar hasta que los atributos esten listos
+            self.ventana.after(500, self.actualizar_grafico)
+            return
+
+        self.canvas.delete("all")
+        tam = 20
+
+        for i in range(20):
+            for j in range(20):
+                x0, y0 = j * tam, i * tam
+                x1, y1 = x0 + tam, y0 + tam
+                contenido = self.mapa[i][j]
+                if isinstance(contenido, str) and contenido.isupper():
+                    self.canvas.create_rectangle(x0, y0, x1, y1, fill="blue", outline="gray")
+                    self.canvas.create_text(x0 + 10, y0 + 10, text=contenido, fill="white", font=("Arial", 8))
+                else:
+                    self.canvas.create_rectangle(x0, y0, x1, y1, outline="gray")
+
+        with self.lock:
+
+            for cliente_id, pos in self.clientes_activos.items():
+                if 'origen' in pos:
+                    origen = pos['origen']
+                    x, y = origen
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill="yellow")
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(cliente_id).lower(), fill="black", font=("Arial", 8))
+
+
+            for taxi_id, info in self.taxis_autenticados.items():
+                if 'posicion' in info:
+                    x, y = info['posicion']
+                    estado_sensor = info.get("estado_sensor")
+                    estado_taxi = info.get("estado_taxi")
+                    if estado_sensor != "OK" or estado_taxi == "FREE":
+                        color = "red"
+                    else:
+                        color = "green"
+
+                    self.canvas.create_rectangle(y * tam, x * tam, (y + 1) * tam, (x + 1) * tam, fill=color)
+                    self.canvas.create_text(y * tam + 10, x * tam + 10, text=str(taxi_id), fill="white", font=("Arial", 8))
+
+        self.text_taxis.delete('1.0', tk.END)
+        self.text_taxis.insert(tk.END, "Id\tDestino\tEstado\n")
+
+        self.text_clientes.delete('1.0', tk.END)
+        self.text_clientes.insert(tk.END, "Id\tDestino\tEstado\n")
+
+        with self.lock:
+            for cliente_id, info in self.clientes_activos.items():
+                destino = info.get("destino", "")
+                taxi_asignado = ""
+                for t_id, t_info in self.taxis_autenticados.items():
+                    if t_info.get("cliente") == cliente_id:
+                        taxi_asignado = f"Taxi {t_id}"
+                        break
+                self.text_clientes.insert(tk.END, f"{cliente_id}\t{destino}\t{info.get("estado")}. {taxi_asignado}\n")
+
+        with self.lock:
+            for taxi_id, info in self.taxis_autenticados.items():
+                destino = info.get("destino", "")
+                estado = info.get("estado_taxi", "")
+                self.text_taxis.insert(tk.END, f"{taxi_id}\t{destino}\t{info.get("estado_sensor")}. Servicio {destino}\n")
+
+        
+        self.ventana.after(1000, self.actualizar_grafico)
+        
+    def recibir_estado_global(self):
+        for mensaje in self.consumer_estado:
+            try:
+                estado = json.loads(mensaje.value.decode())
+                with self.lock:
+                    self.taxis_autenticados = estado.get("taxis", {})
+                    self.clientes_activos = estado.get("clientes", {})
+                    self.mapa = estado.get("mapa", [])
+            except Exception as e:
+                print(f"Error recibiendo estado global: {e}")
+
+
         
     def enviar_mensaje(self):
         if not self.solicitud_enviada:
@@ -145,9 +259,11 @@ if __name__ == "__main__":
     requests_path = args.requests
     ec_customer = EC_Customer(broker_ip, broker_puerto, requests_path, cliente_id)
     ec_customer.iniciar()
+    ec_customer.iniciar_interfaz_grafica()
+    ec_customer.ventana.mainloop()
 
-    try:
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("[Cliente] Programa finalizado por el usuario.")
+    #try:
+    #    while True:
+    #        time.sleep(1)
+    #except KeyboardInterrupt:
+    #    print("[Cliente] Programa finalizado por el usuario.")

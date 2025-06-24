@@ -29,6 +29,7 @@ class EC_Central:
         threading.Thread(target=self.iniciar_servidor_taxis, daemon=True).start()
         threading.Thread(target=self.procesar_solicitudes_cliente, daemon=True).start()
         threading.Thread(target=self.escuchar_estado_taxis, daemon=True).start()
+        threading.Thread(target=self.enviar_estado_global, daemon=True).start()
 
     def iniciar_servidor_taxis(self):
         self.servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -134,6 +135,18 @@ class EC_Central:
 
         
         self.ventana.after(1000, self.actualizar_grafico)
+
+    def enviar_estado_global(self):
+        while True: 
+            with self.lock:
+                estado = {
+                    "taxis": self.taxis_autenticados,
+                    "clientes": self.clientes_activos,
+                    "mapa": self.mapa
+                }
+                mensaje = json.dumps(estado).encode()
+                self.producer.send('mapa_estado', value=mensaje)
+            time.sleep(1)
         
     def procesar_solicitudes_cliente(self):
         for mensaje in self.consumerSol:
