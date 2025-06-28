@@ -1,3 +1,4 @@
+import base64
 import socket
 import time
 import threading
@@ -7,6 +8,7 @@ import ssl
 import kafka
 from kafka import KafkaProducer, KafkaConsumer
 import tkinter as tk
+from Crypto.Cipher import AES
 
 import requests
 
@@ -16,6 +18,7 @@ class EC_Central:
     def __init__(self, puerto, ip_broker, map_path, db_path):
         self.puerto = puerto
         self.ip_broker = ip_broker
+        self.claves_taxis = {}
         self.taxis_disponibles = {}  # Diccionario para almacenar taxis y sus estados
         self.taxis_autenticados = {}  # Diccionario para almacenar taxis autenticados
         self.db_path = db_path  # Ruta del archivo JSON con los taxis
@@ -224,6 +227,16 @@ class EC_Central:
         except Exception as e:
             print(f"[EC_Central] Error enviando comando '{comando}' al taxi {taxi_id}: {e}")
 
+    def verificar_taxi_en_registry(self, id_taxi):
+        try:#Cambiar ip por la de DE
+            response = requests.get("https://127.0.0.1:5001/list_taxis", verify="ca.crt")
+            if response.status_code == 200:
+                taxis_registrados = response.json().get("taxis", [])
+                return id_taxi in taxis_registrados
+        except Exception as e:
+            print(f"[EC_Central] Error consultando el Registry: {e}")
+        return False
+
 
     def enviar_estado_global(self):
         while True: 
@@ -318,13 +331,42 @@ class EC_Central:
         except Exception as e:
             print(f"[Central] Error al cargar el mapa: {e}")
 
+    def obtener_clave_compartida_del_taxi(self, taxi_id):
+        try:
+            url = "https://127.0.0.1:5001/get_taxi_key"
+            response = requests.post(url, json={"id": taxi_id}, verify="ca.crt")
+            if response.status_code == 200:
+                key = response.json().get("clave")
+                self.claves_taxis[taxi_id] = key
+                return key
+            else:
+                print(f"[EC_Central] No se pudo obtener clave para taxi {taxi_id}: {response.text}")
+                return None
+        except Exception as e:
+            print(f"[EC_Central] Error obteniendo clave de Registry: {e}")
+            return None
+
+
     def escuchar_estado_taxis(self):
         for mensaje in self.consumerTaxiEstado:
             try:
-                solicitud = json.loads(mensaje.value.decode())
-                estado = solicitud['estado']
-                taxi_id = solicitud['taxi_id']
-                posicion = solicitud['posicion']
+
+                valor = json.loads(mensaje.value.decode())
+                iv = base64.urlsafe_b64decode(valor['iv'])
+                ciphertext = base64.urlsafe_b64decode(valor['data'])
+
+                # Aquí deberías tener la clave compartida del taxi correspondiente
+                shared_key = self.obtener_clave_compartida_del_taxi(valor['taxi_id'])  # <-- Implementa esto según tu central
+                if shared_key is None:
+                    print(f"[EC_Central] Clave del taxi {valor['taxi_id']} no encontrada. Ignorando mensaje.")
+                    continue
+                cipher = AES.new(base64.urlsafe_b64decode(shared_key), AES.MODE_CBC, iv=iv)
+                plaintext = cipher.decrypt(ciphertext)
+                plaintext_json = json.loads(plaintext.decode().strip())  # Aquí ya tienes el JSON original con "estado"
+
+                estado = plaintext_json['estado']  # Ahora sí puedes acceder sin error
+                taxi_id = plaintext_json['taxi_id']
+                posicion = plaintext_json['posicion']
                 with self.lock:
                     if taxi_id in self.taxis_autenticados:
                         self.taxis_autenticados[taxi_id]['estado_sensor'] = estado
@@ -384,6 +426,13 @@ class EC_Central:
                             campos = data.split('#')
                             if campos[0] == 'TAXI':
                                 id_taxi_auth = campos[1]
+
+                                # Nueva comprobación contra el Registry
+                                if not self.verificar_taxi_en_registry(id_taxi_auth):
+                                    print(f"[EC_Central] Taxi {id_taxi_auth} no existe en Registry. Rechazando autenticación.")
+                                    taxi_socket.send('NACK'.encode())
+                                    return  # Salir de la función, no aceptar conexión
+
                                 if id_taxi_auth in self.taxis_disponibles:
                                     if id_taxi_auth not in self.taxis_autenticados:
                                         print(f"[EC_Central] Taxi {id_taxi_auth} autenticado.")
@@ -398,6 +447,15 @@ class EC_Central:
                                     taxi_socket.send('NACK'.encode())
                                     print(f"[EC_Central] Taxi {id_taxi_auth} no reconocido.")
                                     taxi_socket.send('NACK'.encode())
+                            elif campos[0] == 'BAJA':
+                                id_taxi = campos[1]
+                                with self.lock:
+                                    if id_taxi in self.taxis_autenticados:
+                                        del self.taxis_autenticados[id_taxi]
+                                        print(f"[EC_Central] Taxi {id_taxi} ha sido dado de baja (notificado por socket).")
+                                taxi_socket.close()
+                                return  # Fin de la sesión de este taxi
+
                             else:
                                 taxi_socket.send('NACK'.encode())
                         else:

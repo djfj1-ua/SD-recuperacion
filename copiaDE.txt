@@ -2,16 +2,11 @@ import socket
 import threading
 import time
 import json
-from Crypto.Cipher import AES
-from Crypto.Util.Padding import pad
-import base64
-import os
 import argparse
 import tkinter as tk
 import kafka
 import ssl
 from kafka import KafkaProducer, KafkaConsumer
-import requests
 
 class EC_DE:
     def __init__(self, id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto):
@@ -22,7 +17,6 @@ class EC_DE:
         self.broker_ip = broker_ip
         self.broker_puerto = broker_puerto
         self.id_taxi = id_taxi
-        self.instrucciones_escuchando = False
         self.conectado_central = False
         self.parar_taxi_central = False
         self.estado_sensores = {}
@@ -38,6 +32,7 @@ class EC_DE:
         self.consumerTaxi = kafka.KafkaConsumer('taxi_instrucciones', bootstrap_servers=[self.broker_ip])
 
         self.inicio_sensores()
+        self.conectar_de()
         self.consumer_estado = KafkaConsumer('mapa_estado', bootstrap_servers=[self.broker_ip])
         threading.Thread(target=self.recibir_estado_global, daemon=True).start()   
     
@@ -209,7 +204,7 @@ class EC_DE:
         #with self.lock:
         self.parar_taxi_sensor = any(self.estado_sensores.values())
         self.parar_taxi = self.parar_taxi_sensor or self.parar_taxi_central
-        #print(f"[Taxi] Estado del taxi {self.id_taxi} actualizado. Estado: {self.parar_taxi}")
+        print(f"[Taxi] Estado del taxi {self.id_taxi} actualizado. Estado: {self.parar_taxi}")
 
     def calcular_lrc(self, data):
         lrc = 0
@@ -222,54 +217,42 @@ class EC_DE:
         return str(calculated_lrc) == lrc.strip()
     
     def conectar_de(self):
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket_de = context.wrap_socket(raw_socket)
         try:
-            context = ssl.create_default_context(cafile='ca.crt')
-            context.check_hostname = False
-            context.verify_mode = ssl.CERT_REQUIRED
-
-            raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.socket_de = context.wrap_socket(raw_socket)
-
-            print(f"[Taxi - {self.id_taxi}] Intentando conectar con EC_Central...")
-
             self.socket_de.connect((self.central_ip, self.central_puerto))
-            print(f"[Taxi - {self.id_taxi}] Conexión SSL establecida con EC_Central.")
-
-            if self.enviar_datos():
-                self.conectado_central = True
-                print(f"[Taxi - {self.id_taxi}] Autenticación con EC_Central completada con éxito.")
-                if not self.instrucciones_escuchando:
-                    threading.Thread(target=self.escuchar_instrucciones, daemon=True).start()
-                    self.instrucciones_escuchando = True
-
-            else:
-                print(f"[Taxi - {self.id_taxi}] Fallo de autenticación. Reintentando en 5 segundos...")
-                self.socket_de.close()
-
+            print(f"[Taxi - {self.id_taxi}] Conectándose al EC_Central.")
+            # Inicio del envío de datos
+            self.enviar_datos()
+        except ConnectionRefusedError:
+            print(f"[Taxi - {self.id_taxi}] No se pudo conectar al EC_Central en {self.ip_engine}:{self.puerto_engine}. Asegúrate de que EC_Central esté en ejecución.")
         except Exception as e:
-            print(f"[Taxi - {self.id_taxi}] Error al intentar conectar o autenticar: {e}")
-
-        time.sleep(5)  # Esperar 5 segundos antes de reintentar
-
+            print(f"[Taxi - {self.id_taxi}] Ocurrió un error al intentar conectarse: {e}")
+            exit(1)
 
     def enviar_datos(self):
+
         data = f'TAXI#{self.id_taxi}'
         lrc = self.calcular_lrc(data)
         mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
 
         try:
             self.socket_de.send(mensaje.encode())
+            #print(f"[Sensor] Enviando estado del sensor: {sensor_status}")
+            # Esperar ACK
             respuesta = self.socket_de.recv(1024).decode()
-            if respuesta == 'ACK':
-                print(f"[Taxi - {self.id_taxi}] Taxi autenticado con éxito.")
-                return True
+            if respuesta != 'ACK':
+                print(f"[Taxi - {self.id_taxi}] Error al autenticar taxi.")
+                exit(1)
             else:
-                print(f"[Taxi - {self.id_taxi}] Autenticación rechazada por Central (respuesta: {respuesta}).")
-                return False
+                print(f"[Taxi - {self.id_taxi}] Taxi autenticado con exito.")
+                threading.Thread(target=self.escuchar_instrucciones, daemon=True).start()
         except Exception as e:
-            print(f"[Taxi - {self.id_taxi}] Error enviando datos de autenticación: {e}")
-            return False
-
+            print(f"[Taxi - {self.id_taxi}] Error al enviar estado del sensor: {e}")
 
     def reconectar_central(self):
         while not self.conectado_central:
@@ -287,9 +270,6 @@ class EC_DE:
                 time.sleep(5)
 
     def enviar_estado_central(self):
-        if not hasattr(self, 'shared_key') or not self.shared_key:
-            print(f"[Taxi - {self.id_taxi}] No tengo clave compartida, no envío estado.")
-            return
         if self.parar_taxi:
             estado = 'BLOQUEADO'
         else:
@@ -302,151 +282,13 @@ class EC_DE:
         }
 
         try:
-            iv, ciphertext = self.encrypt_data(json.dumps(mensaje))
-            mensaje_cifrado = {
-                'taxi_id': self.id_taxi,
-                'iv': iv,
-                'data': ciphertext
-}
-            self.producer.send('taxi_estado', key=self.id_taxi.encode(), value=json.dumps(mensaje_cifrado).encode())
+            #print(f"[Taxi - {self.id_taxi}] Enviando estado a la Central: {mensaje}")
+            self.producer.send('taxi_estado', key=self.id_taxi.encode(), value=json.dumps(mensaje).encode())
             self.producer.flush()
             print(f"[Taxi - {self.id_taxi}] Estado enviado a la Central: {mensaje}")
         except Exception as e:
             print(f"[Taxi - {self.id_taxi}] Error al enviar estado a la Central: {e}")
             self.reconectar_central()
-
-    def load_key(self):
-        try:
-            with open(f"{self.id_taxi}_key.pem", "r") as file:
-                self.shared_key = file.read()
-                print(f"[Taxi {self.id_taxi}] Clave cargada desde archivo.")
-        except Exception as e:
-            print(f"[Taxi {self.id_taxi}] Error cargando la clave: {e}")
-            exit(1)
-
-    def menu_registry(self):
-        while True:
-            print("\n--- MENU REGISTRY ---")
-            print("1. Registrarse")
-            print("2. Autenticarse")
-            print("3. Dar de baja")
-            print("4. Salir")
-
-            option = input("Elija una opción: ")
-
-            if option == '1':
-                self.register_taxi()
-            elif option == '2':
-                self.authenticate_taxi()
-            elif option == '3':
-                self.unregister_taxi()
-            elif option == '4':
-                exit(0)
-            else:
-                print("Opción no válida.")
-
-    def register_taxi(self):
-        try:
-            url = "https://127.0.0.1:5001/register_taxi"
-            response = requests.post(url, json={"id": self.id_taxi}, verify="ca.crt")
-            if response.status_code == 201:
-                print(f"[Taxi {self.id_taxi}] Registro exitoso en el Registry.")
-            else:
-                print(f"[Taxi {self.id_taxi}] Error al registrar: {response.text}")
-        except Exception as e:
-            print(f"Error registrando taxi: {e}")
-
-    def encrypt_data(self, plaintext):
-        key = base64.urlsafe_b64decode(self.shared_key)
-        cipher = AES.new(key, AES.MODE_CBC)
-        ct_bytes = cipher.encrypt(pad(plaintext.encode('utf-8'), AES.block_size))
-        iv = base64.urlsafe_b64encode(cipher.iv).decode('utf-8')
-        ciphertext = base64.urlsafe_b64encode(ct_bytes).decode('utf-8')
-        return iv, ciphertext
-
-
-    def authenticate_taxi(self):
-        try:
-            # Paso 1: Consultar lista de taxis registrados
-            list_url = "https://127.0.0.1:5001/list_taxis"
-            response = requests.get(list_url, verify="ca.crt")
-
-            if response.status_code == 200:
-                taxis_registrados = response.json().get("taxis", [])
-
-            # Paso 2: Comprobar si este taxi está en la lista
-            if self.id_taxi not in taxis_registrados:
-                print(f"[Taxi {self.id_taxi}] No está registrado en el Registry. No se puede autenticar.")
-                return
-            url = "https://127.0.0.1:5001/authenticate_taxi"
-            response = requests.post(url, json={"id": self.id_taxi}, verify="ca.crt")
-            if response.status_code == 200:
-                self.shared_key = response.json().get("key")
-                self.save_key()
-                print(f"[Taxi {self.id_taxi}] Autenticación exitosa. Clave recibida.")
-                ec_de.load_key()
-                self.conectar_de()
-            else:
-                print(f"[Taxi {self.id_taxi}] Error autenticando: {response.text}")
-                exit(1)
-        except Exception as e:
-            print(f"Error autenticando taxi: {e}")
-
-    def unregister_taxi(self):
-        try:
-            # Paso 1: Consultar lista de taxis registrados
-            list_url = "https://127.0.0.1:5001/list_taxis"
-            response = requests.get(list_url, verify="ca.crt")
-
-            if response.status_code == 200:
-                taxis_registrados = response.json().get("taxis", [])
-
-                # Paso 2: Comprobar si este taxi está en la lista
-                if self.id_taxi not in taxis_registrados:
-                    print(f"[Taxi {self.id_taxi}] No está registrado en el Registry. No se puede dar de baja.")
-                    return
-
-                # Paso 3: Si está, proceder a eliminarlo
-                delete_url = "https://127.0.0.1:5001/delete_taxi"
-                delete_response = requests.delete(delete_url, json={"id": self.id_taxi}, verify="ca.crt")
-
-                if delete_response.status_code == 200:
-                    print(f"[Taxi {self.id_taxi}] Baja exitosa.")
-                    self.notificar_baja_por_socket()
-                    print(f"[Taxi - {self.id_taxi}] Taxi dado de baja. Finalizando ejecución.")
-
-                else:
-                    print(f"[Taxi {self.id_taxi}] Error al dar de baja: {delete_response.text}")
-
-            else:
-                print(f"[Taxi {self.id_taxi}] Error consultando Registry: {response.status_code} {response.text}")
-
-        except Exception as e:
-            print(f"Error dando de baja taxi: {e}")
-
-    def notificar_baja_por_socket(self):
-        try:
-            data = f'BAJA#{self.id_taxi}'
-            lrc = self.calcular_lrc(data)
-            mensaje = f'<STX>{data}<ETX><LRC>{lrc}'
-
-            if hasattr(self, 'socket_de'):
-                self.socket_de.send(mensaje.encode())
-                print(f"[Taxi {self.id_taxi}] Baja notificada a la Central por socket.")
-            else:
-                print(f"[Taxi {self.id_taxi}] No hay conexión socket activa para notificar baja.")
-
-        except Exception as e:
-            print(f"[Taxi {self.id_taxi}] Error notificando baja por socket: {e}")
-
-
-    def save_key(self):
-        try:
-            with open(f"{self.id_taxi}_key.pem", "w") as file:
-                file.write(self.shared_key)
-            print(f"Clave guardada para {self.id_taxi}")
-        except Exception as e:
-            print(f"Error guardando la clave: {e}")
 
     def calcular_siguiente_posicion(self, destino):
         x, y = self.posicion
@@ -494,43 +336,41 @@ class EC_DE:
 
     def escuchar_instrucciones(self):
         print(f"[Taxi - {self.id_taxi}] Escuchando instrucciones de taxi...")
-        try: 
-            for mensaje in self.consumerTaxi:
-                try:
-                    if self.id_taxi == mensaje.key.decode():
-                        instruccion = json.loads(mensaje.value.decode())
-                        print(f"[Taxi - {self.id_taxi}] Instrucción recibida: {instruccion}")
 
-                        # Si el mensaje es un comando tipo STOP / RESUME / GO_TO_BASE
-                        if 'comando' in instruccion:
-                            comando = instruccion['comando']
-                            print(f"------> El comando es: {comando}.")
-                            if comando == 'PARAR':
-                                print(f"[Taxi - {self.id_taxi}] Comando recibido: {comando}.")
-                                self.parar_taxi_central = True
-                                self.actualizar_estado_taxi()
-                                self.enviar_estado_central()
-                            elif comando == 'REANUDAR':
-                                print(f"[Taxi - {self.id_taxi}] Comando recibido: {comando}.")
-                                self.parar_taxi_central = False
-                                print(f"Entro en reanudar y la variable de parar taxis es: {self.parar_taxi_central}.")
-                                self.actualizar_estado_taxi()
-                                self.enviar_estado_central()
-                            else:
-                                print(f"[Taxi - {self.id_taxi}] Comando desconocido: {comando}")
+        for mensaje in self.consumerTaxi:
+            try:
+                if self.id_taxi == mensaje.key.decode():
+                    instruccion = json.loads(mensaje.value.decode())
+                    print(f"[Taxi - {self.id_taxi}] Instrucción recibida: {instruccion}")
 
-                        # Si es una instrucción de movimiento (destino normal)
-                        elif 'destino' in instruccion:
-                            print(f"[Taxi - {self.id_taxi}] Instrucción de movimiento hacia: {instruccion['destino']}")
-                            self.mover_destino(instruccion)
-
+                    # Si el mensaje es un comando tipo STOP / RESUME / GO_TO_BASE
+                    if 'comando' in instruccion:
+                        comando = instruccion['comando']
+                        print(f"------> El comando es: {comando}.")
+                        if comando == 'PARAR':
+                            print(f"[Taxi - {self.id_taxi}] Comando recibido: {comando}.")
+                            self.parar_taxi_central = True
+                            self.actualizar_estado_taxi()
+                            self.enviar_estado_central()
+                        elif comando == 'REANUDAR':
+                            print(f"[Taxi - {self.id_taxi}] Comando recibido: {comando}.")
+                            self.parar_taxi_central = False
+                            print(f"Entro en reanudar y la variable de parar taxis es: {self.parar_taxi_central}.")
+                            self.actualizar_estado_taxi()
+                            self.enviar_estado_central()
                         else:
-                            print(f"[Taxi - {self.id_taxi}] Instrucción no reconocida: {instruccion}")
+                            print(f"[Taxi - {self.id_taxi}] Comando desconocido: {comando}")
 
-                except Exception as e:
-                    print(f"[Taxi - {self.id_taxi}] Error al procesar instrucción: {e}")
-        finally:
-            self.instrucciones_escuchando = False
+                    # Si es una instrucción de movimiento (destino normal)
+                    elif 'destino' in instruccion:
+                        print(f"[Taxi - {self.id_taxi}] Instrucción de movimiento hacia: {instruccion['destino']}")
+                        self.mover_destino(instruccion)
+
+                    else:
+                        print(f"[Taxi - {self.id_taxi}] Instrucción no reconocida: {instruccion}")
+
+            except Exception as e:
+                print(f"[Taxi - {self.id_taxi}] Error al procesar instrucción: {e}")
 
 
 if __name__ == "__main__":
@@ -556,8 +396,6 @@ if __name__ == "__main__":
         broker_puerto = args.broker_puerto
         id_taxi = args.id_taxi
         ec_de = EC_DE(id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto)
-
-        threading.Thread(target=ec_de.menu_registry, daemon=True).start()
 
         # Esto se debe ejecutar en el hilo principal
         ec_de.iniciar_interfaz_grafica()
