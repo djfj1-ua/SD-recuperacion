@@ -1,6 +1,7 @@
 from flask import Flask, request, jsonify
 import sqlite3
 import os
+import atexit
 import base64
 from Crypto.Random import get_random_bytes
 
@@ -70,6 +71,14 @@ def authenticate_taxi():
     else:
         return jsonify({"estado": "ERROR", "detalle": "Taxi no encontrado"}), 404
 
+def limpiar_base_de_datos_al_cerrar():
+    print("[Registry] Limpiando base de datos antes de cerrar...")
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute('DELETE FROM taxis')
+    conn.commit()
+    conn.close()
+    print("[Registry] Base de datos limpiada.")
 
 # ==================================
 # Endpoint para eliminar taxi
@@ -128,6 +137,7 @@ def list_taxis():
 # ==================================
 # Main (con HTTPS - usa tu propio certificado autofirmado)
 # ==================================
+atexit.register(limpiar_base_de_datos_al_cerrar)
 if __name__ == '__main__':
     # Necesitas crear estos archivos antes de ejecutar:
     # openssl req -x509 -newkey rsa:4096 -keyout key.pem -out cert.pem -days 365 -nodes

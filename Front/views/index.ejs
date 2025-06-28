@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Estado del sistema EasyCab</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1, h2 { color: #333; }
+        table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #333; color: white; }
+        .map-grid { display: grid; grid-template-columns: repeat(20, 20px); gap: 1px; }
+        .cell { width: 20px; height: 20px; text-align: center; font-size: 12px; line-height: 20px; border: 1px solid #ccc; }
+        .location { background-color: lightgray; }
+        .taxi-free { background-color: green; color: white; }
+        .taxi-busy { background-color: red; color: white; }
+        .cliente { background-color: yellow; color: black; }
+    </style>
+    <meta http-equiv="refresh" content="1">
+</head>
+<body>
+    <h1>Estado del sistema EasyCab</h1>
+    <h3>Estado de la CTC: <%= estadoCTC %></h3>
+
+    <h2>Taxis activos</h2>
+    <table>
+        <tr>
+            <th>ID</th><th>Estado Taxi</th><th>Estado Sensor</th><th>Posición</th><th>Cliente Asignado</th>
+        </tr>
+        <% for (let id in taxis) { %>
+            <tr>
+                <td><%= id %></td>
+                <td><%= taxis[id].estado_taxi %></td>
+                <td><%= taxis[id].estado_sensor %></td>
+                <td><%= taxis[id].posicion %></td>
+                <td><%= taxis[id].cliente %></td>
+            </tr>
+        <% } %>
+    </table>
+
+    <h2>Clientes activos</h2>
+    <table>
+        <tr>
+            <th>ID</th><th>Origen</th><th>Destino</th><th>Estado</th>
+        </tr>
+        <% for (let id in clientes) { %>
+            <tr>
+                <td><%= id %></td>
+                <td><%= clientes[id].origen %></td>
+                <td><%= clientes[id].destino %></td>
+                <td><%= clientes[id].estado %></td>
+            </tr>
+        <% } %>
+    </table>
+
+    <h2>Mapa actual</h2>
+    <div class="map-grid">
+        <% for (let i = 0; i < mapa.length; i++) { %>
+            <% for (let j = 0; j < mapa[i].length; j++) { 
+                let contenido = mapa[i][j];
+                let clase = 'cell';
+                let texto = '';
+
+                // Ver si hay taxi en esta celda
+                let taxiAqui = Object.entries(taxis).find(([taxiId, taxi]) => taxi.posicion && taxi.posicion[0] === i && taxi.posicion[1] === j);
+
+                // Ver si hay cliente aquí
+                let clienteAqui = Object.entries(clientes).find(([cliId, cli]) => cli.origen && cli.origen[0] === i && cli.origen[1] === j);
+
+                if (taxiAqui) {
+                    clase += taxis[taxiAqui[0]].estado_taxi === 'BUSY' ? ' taxi-free' : ' taxi-busy';
+                    texto = taxiAqui[0]; // ID del taxi
+                } else if (clienteAqui) {
+                    clase += ' cliente';
+                    texto = clienteAqui[0];  // ID del cliente
+                } else if (typeof contenido === 'string' && contenido.match(/^[A-Z]$/)) {
+                    clase += ' location';
+                    texto = contenido;
+                }
+            %>
+                <div class="<%= clase %>"><%= texto %></div>
+            <% } %>
+        <% } %>
+    </div>
+</body>
+</html>

@@ -38,7 +38,7 @@ def estado_trafico():
         temperatura = data["main"]["temp"]
         print(f"[CTC] Temperatura actual en {ciudad_actual}: {temperatura}°C")
 
-        if temperatura < 15:
+        if temperatura < 25:
             estado = "KO"
         else:
             estado = "OK"

@@ -5,14 +5,40 @@ import threading
 import argparse 
 import json
 import ssl
+from flask import Flask, app, jsonify
+import logging
+import os
 import kafka
 from kafka import KafkaProducer, KafkaConsumer
 import tkinter as tk
 from Crypto.Cipher import AES
-
+from flask_cors import CORS
 import requests
 
+# ========================
+# CONFIGURACIÓN DE AUDITORÍA (LOGGING)
+# ========================
+
+# Ruta y nombre del archivo de log
+LOG_FILE = 'auditoria.log'
+
+# Si quieres que cada vez se cree un archivo nuevo limpio, descomenta la siguiente línea:
+# if os.path.exists(LOG_FILE):
+#     os.remove(LOG_FILE)
+
+logging.basicConfig(
+    filename=LOG_FILE,
+    level=logging.INFO,
+    format='[%(asctime)s] %(levelname)s: %(message)s',
+    datefmt='%Y-%m-%d %H:%M:%S'
+)
+
+logging.info("===== Inicio de ejecución de EC_Central =====")
+
 SERVER = socket.gethostbyname(socket.gethostname())
+
+app = Flask(__name__)
+CORS(app)  # Permite peticiones desde el Frontend (localhost:3000, etc.)
 
 class EC_Central:
     def __init__(self, puerto, ip_broker, map_path, db_path):
@@ -40,6 +66,8 @@ class EC_Central:
         threading.Thread(target=self.procesar_comandos_arbitrarios, daemon=True).start()
         threading.Thread(target=self.revisar_estado_ctc, daemon=True).start()
 
+    def iniciar_http_server(self):
+        app = Flask(__name__)
 
     def iniciar_servidor_taxis(self):
 
@@ -55,6 +83,8 @@ class EC_Central:
         while True:
             #print("[EC_Central] Esperando conexión de taxis...")
             taxi_socket, direccion = self.servidor.accept()
+            #print(f"[EC_Central] Conexión de taxi desde {direccion}")
+            logging.info(f"[EC_Central] Conexión de taxi desde {direccion}")
             print(f"[EC_Central] Conexión de taxi desde {direccion}")
             threading.Thread(target=self.autenticacion_taxi, args=(taxi_socket, direccion,), daemon=True).start()
 
@@ -88,6 +118,8 @@ class EC_Central:
 
         self.cuadros = {}
         self.actualizar_grafico()
+
+
 
     def actualizar_grafico(self):
         self.canvas.delete("all")
@@ -172,6 +204,7 @@ class EC_Central:
                                 self.enviar_instrucciones_taxi(taxi_id, destino_coord)
                             else:
                                 print(f"[CENTRAL] Destino {destino_id} no encontrado.")
+                                logging.warning(f"[CENTRAL] Destino {destino_id} no encontrado.")
                         elif comando == 'VOLVER_BASE':
                             #self.taxis_autenticados[taxi_id]['estado_taxi'] = 'FREE'
                             cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
@@ -192,18 +225,25 @@ class EC_Central:
                             try:
                                 self.producer.send('cliente_respuesta', key=cliente_id.encode(), value=json.dumps(mensaje).encode())
                                 self.producer.flush()
+                                logging.info(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
                                 print(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
                             except Exception as e:
+                                logging.error(f"[CENTRAL] Error notificando al cliente {cliente_id}: {e}")
                                 print(f"[CENTRAL] Error notificando al cliente {cliente_id}: {e}")
+                                logging.info(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
+                                print(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
 
 
                             self.enviar_instrucciones_taxi(taxi_id, (0, 0))
                         else:
                             print("[CENTRAL] Comando no reconocido o parámetros insuficientes.")
+                            logging.error("[CENTRAL] Comando no reconocido o parámetros insuficientes.")
                     else:
                         print(f"[CENTRAL] Taxi {taxi_id} no está autenticado.")
+                        logging.error(f"[CENTRAL] Taxi {taxi_id} no está autenticado.")
                 else:
                     print("[CENTRAL] Formato incorrecto. Use: TAXI_ID COMANDO [DESTINO]")
+                    logging.error("[CENTRAL] Formato incorrecto. Use: TAXI_ID COMANDO [DESTINO]")
 
     def enviar_comando_taxi(self, taxi_id, comando):
         """
@@ -214,6 +254,7 @@ class EC_Central:
         """
         try:
             print(f"[EC_Central] Enviando comando '{comando}' al taxi {taxi_id}.")
+            logging.info(f"[EC_Central] Enviando comando '{comando}' al taxi {taxi_id}.")
 
             mensaje = {
                 'taxi_id': taxi_id,
@@ -222,9 +263,10 @@ class EC_Central:
 
             self.producer.send('taxi_instrucciones', key=taxi_id.encode(), value=json.dumps(mensaje).encode())
             self.producer.flush()
-            print(f"[EC_Central] Comando '{comando}' enviado al taxi {taxi_id} correctamente.")
+            #print(f"[EC_Central] Comando '{comando}' enviado al taxi {taxi_id} correctamente.")
 
         except Exception as e:
+            logging.error(f"[EC_Central] Error enviando comando '{comando}' al taxi {taxi_id}: {e}")
             print(f"[EC_Central] Error enviando comando '{comando}' al taxi {taxi_id}: {e}")
 
     def verificar_taxi_en_registry(self, id_taxi):
@@ -235,6 +277,7 @@ class EC_Central:
                 return id_taxi in taxis_registrados
         except Exception as e:
             print(f"[EC_Central] Error consultando el Registry: {e}")
+            logging.error(f"[EC_Central] Error consultando el Registry: {e}")
         return False
 
 
@@ -260,16 +303,19 @@ class EC_Central:
                 # Si cambia el estado, actualízalo
                 if nuevo_estado != self.ctc_estado:
                     print(f"[EC_Central] Estado CTC actualizado: {nuevo_estado}")
+                    logging.info(f"[EC_Central] Estado CTC actualizado: {nuevo_estado}")
                     self.ctc_estado = nuevo_estado
 
                 if self.ctc_estado == "KO":
                     print("[EC_Central] Estado KO: Ordenando a todos los taxis volver a base.")
+                    logging.warning("[EC_Central] Estado KO: Ordenando a todos los taxis volver a base.")
                     with self.lock:
                         for taxi_id in self.taxis_autenticados:
                             self.enviar_instrucciones_taxi(taxi_id, (0, 0))
 
             except Exception as e:
                 print(f"[EC_Central] Error al consultar EC_CTC: {e}")
+                logging.error(f"[EC_Central] Error al consultar EC_CTC: {e}")
 
 
         
@@ -285,6 +331,7 @@ class EC_Central:
 
                 if cliente_id not in self.clientes_activos:
                     print(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                    logging.info(f"Posicion del cliente {cliente_id}: {origen_coord}")
                     self.clientes_activos[cliente_id] = {
                         'destino': destino_coord,
                         'origen': origen_coord,
@@ -292,6 +339,7 @@ class EC_Central:
                     }
                 else:
                     print(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                    logging.info(f"Posicion del cliente {cliente_id}: {origen_coord}")
                     self.clientes_activos[cliente_id] = {
                         'destino': destino_coord,
                         'origen': origen_coord,
@@ -299,6 +347,7 @@ class EC_Central:
                     }
 
                 print(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
+                logging.info(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
     
                 taxi_id = self.unir_taxi_cliente(cliente_id, destino_coord)
                 if taxi_id:
@@ -308,11 +357,13 @@ class EC_Central:
                     threading.Thread(target=self.llevar_taxi_a_cliente, args=(taxi_id, cliente_id, destino_coord, origen_coord), daemon=True).start()
                 else:
                     print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
+                    logging.info(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
                     self.enviar_mensaje_cliente(cliente_id, 'KO')
                     self.clientes_activos[cliente_id]["estado"] = 'ESPERA'
                     #del self.clientes_activos[cliente_id]  # Eliminar cliente si no hay taxi disponible
             except json.JSONDecodeError as e:
                 print(f"[EC_Central] Error al procesar el mensaje: {e}")
+                logging.error(f"[EC_Central] Error al procesar el mensaje: {e}")
                 del self.clientes_activos[cliente_id]  # Eliminar cliente si hay error en el mensaje
 
     def cargar_mapa(self):
@@ -330,20 +381,23 @@ class EC_Central:
             #print("[Central] Mapa cargado correctamente.")
         except Exception as e:
             print(f"[Central] Error al cargar el mapa: {e}")
+            logging.error(f"[Central] Error al cargar el mapa: {e}")
 
     def obtener_clave_compartida_del_taxi(self, taxi_id):
         try:
             url = "https://127.0.0.1:5001/get_taxi_key"
             response = requests.post(url, json={"id": taxi_id}, verify="ca.crt")
             if response.status_code == 200:
-                key = response.json().get("clave")
+                key = response.json().get("key")
                 self.claves_taxis[taxi_id] = key
                 return key
             else:
                 print(f"[EC_Central] No se pudo obtener clave para taxi {taxi_id}: {response.text}")
+                logging.error(f"[EC_Central] No se pudo obtener clave para taxi {taxi_id}: {response.text}")
                 return None
         except Exception as e:
             print(f"[EC_Central] Error obteniendo clave de Registry: {e}")
+            logging.error(f"[EC_Central] Error obteniendo clave de Registry: {e}")
             return None
 
 
@@ -359,6 +413,7 @@ class EC_Central:
                 shared_key = self.obtener_clave_compartida_del_taxi(valor['taxi_id'])  # <-- Implementa esto según tu central
                 if shared_key is None:
                     print(f"[EC_Central] Clave del taxi {valor['taxi_id']} no encontrada. Ignorando mensaje.")
+                    logging.error(f"[EC_Central] Clave del taxi {valor['taxi_id']} no encontrada. Ignorando mensaje.")
                     continue
                 cipher = AES.new(base64.urlsafe_b64decode(shared_key), AES.MODE_CBC, iv=iv)
                 plaintext = cipher.decrypt(ciphertext)
@@ -371,6 +426,7 @@ class EC_Central:
                     if taxi_id in self.taxis_autenticados:
                         self.taxis_autenticados[taxi_id]['estado_sensor'] = estado
                         self.taxis_autenticados[taxi_id]['posicion'] = posicion
+                        logging.info(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
                         print(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
 
                         cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
@@ -379,17 +435,20 @@ class EC_Central:
 
             except Exception as e:
                 print(f"[EC_Central] Error procesando mensaje de taxi_estado: {e}")
+                logging.error(f"[EC_Central] Error procesando mensaje de taxi_estado: {e}")
 
-    def esperar_llegada_taxi(self, taxi_id, destino, timeout=60):
+    def esperar_llegada_taxi(self, taxi_id, destino, timeout=30):
         start_time = time.time()
         while time.time() - start_time < timeout:
             with self.lock:
                 posicion = self.taxis_autenticados.get(taxi_id, {}).get('posicion')
             if posicion and tuple(posicion) == tuple(destino):
                 print(f"[EC_Central] Taxi {taxi_id} ha llegado a su destino {destino}.")
+                logging.info(f"[EC_Central] Taxi {taxi_id} ha llegado a su destino {destino}.")
                 return True
             time.sleep(0.5)
         print(f"[EC_Central] Tiempo de espera agotado para el taxi {taxi_id} en destino {destino}")
+        logging.warning(f"[EC_Central] Tiempo de espera agotado para el taxi {taxi_id} en destino {destino}")
         return False
 
     def cargar_localizaciones(self):
@@ -406,6 +465,7 @@ class EC_Central:
                 #print("Localizaciones cargadas correctamente.")
         except Exception as e:
             print(f"Error cargando las localizaciones: {e}")
+            logging.error(f"Error cargando las localizaciones: {e}")
 
     def autenticacion_taxi(self, taxi_socket, direccion):
         id_taxi_auth = None  # Inicializar id_taxi_auth 
@@ -430,22 +490,26 @@ class EC_Central:
                                 # Nueva comprobación contra el Registry
                                 if not self.verificar_taxi_en_registry(id_taxi_auth):
                                     print(f"[EC_Central] Taxi {id_taxi_auth} no existe en Registry. Rechazando autenticación.")
+                                    logging.warning(f"[EC_Central] Taxi {id_taxi_auth} no existe en Registry. Rechazando autenticación.")
                                     taxi_socket.send('NACK'.encode())
                                     return  # Salir de la función, no aceptar conexión
 
                                 if id_taxi_auth in self.taxis_disponibles:
                                     if id_taxi_auth not in self.taxis_autenticados:
                                         print(f"[EC_Central] Taxi {id_taxi_auth} autenticado.")
+                                        logging.info(f"[EC_Central] Taxi {id_taxi_auth} autenticado.")
                                         self.taxis_autenticados[id_taxi_auth] = self.taxis_disponibles[id_taxi_auth]
                                         autenticado_en_esta_sesion = True
                                         taxi_socket.send('ACK'.encode())
                                     else:
                                         taxi_socket.send('NACK'.encode())
                                         print(f"[EC_Central] Error: Taxi {id_taxi_auth} ya autenticado.")
+                                        logging.warning(f"[EC_Central] Error: Taxi {id_taxi_auth} ya autenticado.")
                                         taxi_socket.send('NACK'.encode())
                                 else:
                                     taxi_socket.send('NACK'.encode())
                                     print(f"[EC_Central] Taxi {id_taxi_auth} no reconocido.")
+                                    logging.warning(f"[EC_Central] Taxi {id_taxi_auth} no reconocido.")
                                     taxi_socket.send('NACK'.encode())
                             elif campos[0] == 'BAJA':
                                 id_taxi = campos[1]
@@ -453,6 +517,7 @@ class EC_Central:
                                     if id_taxi in self.taxis_autenticados:
                                         del self.taxis_autenticados[id_taxi]
                                         print(f"[EC_Central] Taxi {id_taxi} ha sido dado de baja (notificado por socket).")
+                                        logging.info(f"[EC_Central] Taxi {id_taxi} ha sido dado de baja (notificado por socket).")
                                 taxi_socket.close()
                                 return  # Fin de la sesión de este taxi
 
@@ -477,19 +542,20 @@ class EC_Central:
                             'destino': '',
                             'cliente': ''
                         }
-                    print(f"[EC_Central] Taxi {id_taxi_auth} reseteado en taxis_disponibles.")
 
                     print(f"[EC_Central] Conexión con el taxi {id_taxi_auth}:{direccion} perdida.")
-                    print(f"[EC_Central] Taxi {id_taxi_auth} eliminado de taxis autenticados.")
+                    logging.error(f"[EC_Central] Conexión con el taxi {id_taxi_auth}:{direccion} perdida.")
                     autenticado_en_esta_sesion = False
                     taxi_socket.close()
                 else:
                     print(f"[EC_Central] Taxi {direccion} no autenticado. Cerrando conexión.")
+                    logging.error(f"[EC_Central] Taxi {direccion} no autenticado. Cerrando conexión.")
                     taxi_socket.close() 
                 break
 
             except Exception as e:
                 print(f"[EC_Central] Error en la conexión con el taxi: {e}")
+                logging.error(f"[EC_Central] Error en la conexión con el taxi: {e}")
                 break
 
 
@@ -515,17 +581,20 @@ class EC_Central:
                     # Validar estado
                     if estado not in ['FREE', 'BUSY', 'STOPPED', 'END',]:
                         print(f"Estado '{estado}' no reconocido para el taxi {taxi_id}. Taxi omitido.")
+                        logging.warning(f"Estado '{estado}' no reconocido para el taxi {taxi_id}. Taxi omitido.")
                         continue
 
                     # Validar posición
                     x, y = posicion
                     if not (0 <= x < 20 and 0 <= y < 20):
                         print(f"Posición {posicion} fuera del mapa para el taxi {taxi_id}. Taxi omitido.")
+                        logging.error(f"Posición {posicion} fuera del mapa para el taxi {taxi_id}. Taxi omitido.")
                         continue
 
                     # Verificar ID duplicado
                     if taxi_id in self.taxis_disponibles:
                         print(f"Taxi con id {taxi_id} ya cargado. Esperando su autenticación.")
+                        logging.warning(f"Taxi con id {taxi_id} ya cargado. Esperando su autenticación.")
                         continue
 
                     self.taxis_disponibles[taxi_id] = {
@@ -536,9 +605,12 @@ class EC_Central:
                         'cliente': ''
                     }
                 print(f"Taxi {taxi_id} cargado con posición {posicion} y estado {estado}.")    
+                logging.info(f"Taxi {taxi_id} cargado con posición {posicion} y estado {estado}.")
             print("Taxis cargados correctamente.")
+            logging.info("Taxis cargados correctamente.")
         except Exception as e:
             print(f"Error cargando los taxis: {e}")
+            logging.error(f"Error cargando los taxis: {e}")
 
     def enviar_mensaje_cliente(self, id_cliente, estado):
         time.sleep(0.5)  # Simular un pequeño retraso para evitar colisiones en el envío
@@ -564,13 +636,16 @@ class EC_Central:
             #print(f"[DEBUG] Estados de taxis autenticados:")
             for taxi_id, taxi_info in self.taxis_autenticados.items():
                 print(f"  Taxi {taxi_id}: {taxi_info['estado_taxi']}")
+                logging.info(f"  Taxi {taxi_id}: {taxi_info['estado_taxi']}")
                 if taxi_info['estado_taxi'] == 'FREE':
                     taxi_info['estado_taxi'] = 'BUSY'
                     taxi_info['destino'] = destino_coord
                     taxi_info['cliente'] = cliente_id
                     self.actualizar_mapa = True
                     print(f"Taxi {taxi_id} asignado al cliente {cliente_id} con destino {destino_coord}.")
+                    logging.info(f"Taxi {taxi_id} asignado al cliente {cliente_id} con destino {destino_coord}.")
                     return taxi_id
+        logging.info(f"No hay taxis disponibles.")
         print(f"No hay taxis disponibles.")
 
     def llevar_taxi_a_cliente(self, taxi_id, cliente_id, destino, cliente_origen):
@@ -579,6 +654,7 @@ class EC_Central:
 
         if taxi_info:
             print(f"Taxi {taxi_id} se dirige a recoger al cliente {cliente_id} en {cliente_origen}.")
+            logging.info(f"Taxi {taxi_id} se dirige a recoger al cliente {cliente_id} en {cliente_origen}.")
             taxi_info['estado_taxi'] = 'RUN'
             self.actualizar_mapa = True
             self.enviar_instrucciones_taxi(taxi_id, cliente_origen)
@@ -588,11 +664,13 @@ class EC_Central:
                 taxi_info['estado_taxi'] = 'BUSY'
                 self.clientes_activos[cliente_id]['en_taxi'] = True
             print(f"Taxi {taxi_id} ha llegado a {cliente_origen} para recoger al cliente.")
+            logging.info(f"Taxi {taxi_id} ha llegado a {cliente_origen} para recoger al cliente.")
             self.enviar_mensaje_cliente(cliente_id, 'RECOGIDO')
             #print(f"Enviado mensaje recogido al cliente")
             self.actualizar_tabla = True
             # Instrucciones para llevar al cliente al destino
             print(f"Taxi {taxi_id} llevando al cliente {cliente_id} a {destino}.")
+            logging.info(f"Taxi {taxi_id} llevando al cliente {cliente_id} a {destino}.")
             self.enviar_instrucciones_taxi(taxi_id, self.localizaciones[destino])
             self.esperar_llegada_taxi(taxi_id, self.localizaciones[destino])
             self.enviar_mensaje_cliente_final(cliente_id, 'DESTINO', self.localizaciones[destino])
@@ -601,14 +679,17 @@ class EC_Central:
                 taxi_info['destino'] = ''
                 taxi_info['cliente'] = ''
             print(f"[DEBUG] Taxi {taxi_id} marcado como FREE después de entregar al cliente. ->> {taxi_info['estado_taxi']}")
+            logging.info(f"[DEBUG] Taxi {taxi_id} marcado como FREE después de entregar al cliente. ->> {taxi_info['estado_taxi']}")
 
 
         else:
             print(f"[CENTRAL] No se pudo enviar taxi {taxi_id} al cliente {cliente_id}.")
+            logging.error(f"[CENTRAL] No se pudo enviar taxi {taxi_id} al cliente {cliente_id}.")
 
     def enviar_instrucciones_taxi(self, taxi_id, destino):
         if self.ctc_estado == "KO" and destino != (0, 0):
             print(f"[EC_Central] No puedo enviar instrucciones al taxi {taxi_id} porque el tráfico está en KO.")
+            logging.warning(f"[EC_Central] No puedo enviar instrucciones al taxi {taxi_id} porque el tráfico está en KO.")
             return  # No hacer nada si está en KO y no va a base
 
         time.sleep(0.5)
@@ -617,6 +698,19 @@ class EC_Central:
             'destino': destino
         }
         self.producer.send('taxi_instrucciones', key=taxi_id.encode(), value=json.dumps(mensaje).encode())
+
+    def iniciar_http_server(self):
+        @app.route('/estado', methods=['GET'])
+        def estado():
+            with self.lock:
+                return jsonify({
+                    "ctc_estado": self.ctc_estado,
+                    "taxis": self.taxis_autenticados,
+                    "clientes": self.clientes_activos,
+                    "mapa": self.mapa
+                })
+
+        app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False, threaded=True)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="EC_Central - Central de control de taxis")
@@ -633,6 +727,7 @@ if __name__ == "__main__":
     map_path = "EC_locations.json"  # Ruta del mapa de localizaciones
 
     ec_central = EC_Central(puerto, ip_broker, map_path, db_path)
+    threading.Thread(target=ec_central.iniciar_http_server, daemon=True).start()
     ec_central.cargar_localizaciones()  
 
     # Esto se debe ejecutar en el hilo principal

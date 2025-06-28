@@ -319,10 +319,13 @@ class EC_DE:
         try:
             with open(f"{self.id_taxi}_key.pem", "r") as file:
                 self.shared_key = file.read()
-                print(f"[Taxi {self.id_taxi}] Clave cargada desde archivo.")
+            if not self.shared_key:
+                print("La clave cargada está vacía.")
+            print(f"[Taxi {self.id_taxi}] Clave cargada desde archivo.")
         except Exception as e:
             print(f"[Taxi {self.id_taxi}] Error cargando la clave: {e}")
             exit(1)
+
 
     def menu_registry(self):
         while True:
@@ -556,6 +559,16 @@ if __name__ == "__main__":
         broker_puerto = args.broker_puerto
         id_taxi = args.id_taxi
         ec_de = EC_DE(id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto)
+
+        clave_file = f"{id_taxi}_key.pem"
+
+        if os.path.exists(clave_file):
+            print(f"[Taxi {id_taxi}] Clave existente detectada, cargando clave...")
+            ec_de.load_key()
+        else:
+            print(f"[Taxi {id_taxi}] No se encontró clave local. Iniciando autenticación contra Registry...")
+            ec_de.authenticate_taxi()
+
 
         threading.Thread(target=ec_de.menu_registry, daemon=True).start()
 
