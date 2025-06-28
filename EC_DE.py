@@ -5,6 +5,7 @@ import json
 import argparse
 import tkinter as tk
 import kafka
+import ssl
 from kafka import KafkaProducer, KafkaConsumer
 
 class EC_DE:
@@ -16,8 +17,11 @@ class EC_DE:
         self.broker_ip = broker_ip
         self.broker_puerto = broker_puerto
         self.id_taxi = id_taxi
+        self.conectado_central = False
+        self.parar_taxi_central = False
         self.estado_sensores = {}
         self.parar_taxi = False  # Indica si el taxi debe detenerse
+        self.parar_taxi_sensor = False
         self.posicion = (0,0)
         self.mapa = [[0 for _ in range(20)] for _ in range(20)]
         self.taxis = {}
@@ -179,7 +183,7 @@ class EC_DE:
                                         self.estado_sensores[campos[2]] = True
                                     else:
                                         self.estado_sensores[campos[2]] = False
-                                    self.actualizar_estado_sensores()
+                                    self.actualizar_estado_taxi()
                                 sensor_socket.send('ACK'.encode())
                                 #print(f"[Taxi] Estado del sensor actualizado: {self.sensor_status}")
                             else:
@@ -196,9 +200,11 @@ class EC_DE:
             
         self.sensor_status = 'CONTINGENCY'
     
-    def actualizar_estado_sensores(self):
-        self.parar_taxi = any(self.estado_sensores.values())
-        #print(f"[Taxi] Estado de los sensores actualizado. Parar taxi: {self.parar_taxi}")
+    def actualizar_estado_taxi(self):
+        #with self.lock:
+        self.parar_taxi_sensor = any(self.estado_sensores.values())
+        self.parar_taxi = self.parar_taxi_sensor or self.parar_taxi_central
+        print(f"[Taxi] Estado del taxi {self.id_taxi} actualizado. Estado: {self.parar_taxi}")
 
     def calcular_lrc(self, data):
         lrc = 0
@@ -211,12 +217,17 @@ class EC_DE:
         return str(calculated_lrc) == lrc.strip()
     
     def conectar_de(self):
-        self.socket_de = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        context = ssl.create_default_context()
+        context.check_hostname = False
+        context.verify_mode = ssl.CERT_NONE
+
+        raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.socket_de = context.wrap_socket(raw_socket)
         try:
             self.socket_de.connect((self.central_ip, self.central_puerto))
             print(f"[Taxi - {self.id_taxi}] Conectándose al EC_Central.")
             # Inicio del envío de datos
-            threading.Thread(target=self.enviar_datos, daemon=True).start()
+            self.enviar_datos()
         except ConnectionRefusedError:
             print(f"[Taxi - {self.id_taxi}] No se pudo conectar al EC_Central en {self.ip_engine}:{self.puerto_engine}. Asegúrate de que EC_Central esté en ejecución.")
         except Exception as e:
@@ -271,7 +282,7 @@ class EC_DE:
         }
 
         try:
-            print(f"[Taxi - {self.id_taxi}] Enviando estado a la Central: {mensaje}")
+            #print(f"[Taxi - {self.id_taxi}] Enviando estado a la Central: {mensaje}")
             self.producer.send('taxi_estado', key=self.id_taxi.encode(), value=json.dumps(mensaje).encode())
             self.producer.flush()
             print(f"[Taxi - {self.id_taxi}] Estado enviado a la Central: {mensaje}")
@@ -325,14 +336,42 @@ class EC_DE:
 
     def escuchar_instrucciones(self):
         print(f"[Taxi - {self.id_taxi}] Escuchando instrucciones de taxi...")
+
         for mensaje in self.consumerTaxi:
             try:
                 if self.id_taxi == mensaje.key.decode():
                     instruccion = json.loads(mensaje.value.decode())
                     print(f"[Taxi - {self.id_taxi}] Instrucción recibida: {instruccion}")
-                    self.mover_destino(instruccion)
+
+                    # Si el mensaje es un comando tipo STOP / RESUME / GO_TO_BASE
+                    if 'comando' in instruccion:
+                        comando = instruccion['comando']
+                        print(f"------> El comando es: {comando}.")
+                        if comando == 'PARAR':
+                            print(f"[Taxi - {self.id_taxi}] Comando recibido: {comando}.")
+                            self.parar_taxi_central = True
+                            self.actualizar_estado_taxi()
+                            self.enviar_estado_central()
+                        elif comando == 'REANUDAR':
+                            print(f"[Taxi - {self.id_taxi}] Comando recibido: {comando}.")
+                            self.parar_taxi_central = False
+                            print(f"Entro en reanudar y la variable de parar taxis es: {self.parar_taxi_central}.")
+                            self.actualizar_estado_taxi()
+                            self.enviar_estado_central()
+                        else:
+                            print(f"[Taxi - {self.id_taxi}] Comando desconocido: {comando}")
+
+                    # Si es una instrucción de movimiento (destino normal)
+                    elif 'destino' in instruccion:
+                        print(f"[Taxi - {self.id_taxi}] Instrucción de movimiento hacia: {instruccion['destino']}")
+                        self.mover_destino(instruccion)
+
+                    else:
+                        print(f"[Taxi - {self.id_taxi}] Instrucción no reconocida: {instruccion}")
+
             except Exception as e:
                 print(f"[Taxi - {self.id_taxi}] Error al procesar instrucción: {e}")
+
 
 if __name__ == "__main__":
     try:
@@ -356,15 +395,12 @@ if __name__ == "__main__":
         broker_ip = args.broker_ip
         broker_puerto = args.broker_puerto
         id_taxi = args.id_taxi
-        print(f"hola caracola")
         ec_de = EC_DE(id_taxi, sensores_ip, sensores_puerto, central_ip, central_puerto, broker_ip, broker_puerto)
-        print(f"hola caracola2")
+
         # Esto se debe ejecutar en el hilo principal
         ec_de.iniciar_interfaz_grafica()
-        print(f"hola caracola3")
         # mainloop bloquea, por eso debe ir aquí
         ec_de.ventana.mainloop()
-        print(f"hola caracola4")
         #try:
         #    while True:
         #        time.sleep(1)

@@ -201,8 +201,6 @@ class EC_Customer:
                 if id_cliente_response == self.cliente_id:
                     if status == 'OK':
                         self.log(f"[Cliente {self.cliente_id}] Solicitud procesada correctamente. Un taxi esta en camino.")
-                        # Ahora sí eliminamos la solicitud con éxito
-                        self.solicitudes_pendientes.pop(0)
                         self.log(f"[Cliente {self.cliente_id}] Solicitudes cargadas: {self.solicitudes_pendientes}")
                     elif status == 'KO':
                         self.log(f"[Cliente {self.cliente_id}] Error al procesar la solicitud. No hay taxis disponibles.")
@@ -218,9 +216,21 @@ class EC_Customer:
                         self.posicion = tuple(posicion)
                         self.solicitud_enviada = False
                         print(f"Cliente {self.cliente_id} ha llegado a su destino en {self.posicion}.")
+                        # Ahora sí eliminamos la solicitud con éxito
+                        self.solicitudes_pendientes.pop(0)
                         self.log(f"[Cliente {self.cliente_id}] 4 segundos para el siguiente movimiento.")
                         time.sleep(4)
                         self.enviar_mensaje()
+                    elif status == 'ABANDONADO':
+                        posicion = respuesta.get('posicion')
+                        if posicion:
+                            self.posicion = tuple(posicion)
+                            self.solicitud_enviada = False
+                            self.log(f"[Cliente {self.cliente_id}] El taxi me ha abandonado en {self.posicion}. Reintentando mi solicitud anterior en 4 segundos...")
+                            time.sleep(4)
+                            self.enviar_mensaje()
+                        else:
+                            self.log(f"[Cliente {self.cliente_id}] Recibido ABANDONADO pero sin posición. No puedo reintentar.")
                     else:
                         self.log(f"[Cliente {self.cliente_id}] Respuesta desconocida: {respuesta}")
             except StopIteration:
