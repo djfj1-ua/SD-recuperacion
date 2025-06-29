@@ -7,14 +7,33 @@
         body { font-family: Arial, sans-serif; margin: 20px; }
         h1, h2 { color: #333; }
         table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; font-size: 12px; }
         th { background-color: #333; color: white; }
+        .flex-container { display: flex; }
+        .auditoria {
+            font-size: 14px;   /* Puedes subir más si quieres, por ejemplo 16px o 18px */
+            height: 400px;      /* Ajusta a tu gusto */
+            overflow-y: auto;   /* Para que sea scrollable si hay mucho texto */
+            border: 1px solid #ccc;
+            background-color: #f9f9f9;
+            padding: 10px;
+            white-space: pre-wrap; /* Para que los saltos de línea se respeten */
+        }
+        .map-section { margin-right: 20px; }
         .map-grid { display: grid; grid-template-columns: repeat(20, 20px); gap: 1px; }
         .cell { width: 20px; height: 20px; text-align: center; font-size: 12px; line-height: 20px; border: 1px solid #ccc; }
         .location { background-color: lightgray; }
         .taxi-free { background-color: green; color: white; }
         .taxi-busy { background-color: red; color: white; }
         .cliente { background-color: yellow; color: black; }
+        pre {
+            background-color: #f5f5f5;
+            border: 1px solid #ccc;
+            padding: 10px;
+            max-height: 300px;
+            overflow-y: scroll;
+            font-size: 12px;
+        }
     </style>
     <meta http-equiv="refresh" content="1">
 </head>
@@ -22,65 +41,81 @@
     <h1>Estado del sistema EasyCab</h1>
     <h3>Estado de la CTC: <%= estadoCTC %></h3>
 
-    <h2>Taxis activos</h2>
-    <table>
-        <tr>
-            <th>ID</th><th>Estado Taxi</th><th>Estado Sensor</th><th>Posición</th><th>Cliente Asignado</th>
-        </tr>
-        <% for (let id in taxis) { %>
-            <tr>
-                <td><%= id %></td>
-                <td><%= taxis[id].estado_taxi %></td>
-                <td><%= taxis[id].estado_sensor %></td>
-                <td><%= taxis[id].posicion %></td>
-                <td><%= taxis[id].cliente %></td>
-            </tr>
-        <% } %>
-    </table>
+    <div class="flex-container">
 
-    <h2>Clientes activos</h2>
-    <table>
-        <tr>
-            <th>ID</th><th>Origen</th><th>Destino</th><th>Estado</th>
-        </tr>
-        <% for (let id in clientes) { %>
-            <tr>
-                <td><%= id %></td>
-                <td><%= clientes[id].origen %></td>
-                <td><%= clientes[id].destino %></td>
-                <td><%= clientes[id].estado %></td>
-            </tr>
-        <% } %>
-    </table>
+        <!-- Mapa -->
+        <div class="map-section">
+            <h2>Mapa actual</h2>
+            <div class="map-grid">
+                <% for (let i = 0; i < mapa.length; i++) { %>
+                    <% for (let j = 0; j < mapa[i].length; j++) { 
+                        let contenido = mapa[i][j];
+                        let clase = 'cell';
+                        let texto = '';
 
-    <h2>Mapa actual</h2>
-    <div class="map-grid">
-        <% for (let i = 0; i < mapa.length; i++) { %>
-            <% for (let j = 0; j < mapa[i].length; j++) { 
-                let contenido = mapa[i][j];
-                let clase = 'cell';
-                let texto = '';
+                        let taxiAqui = Object.entries(taxis).find(([taxiId, taxi]) => taxi.posicion && taxi.posicion[0] === i && taxi.posicion[1] === j);
+                        let clienteAqui = Object.entries(clientes).find(([cliId, cli]) => cli.origen && cli.origen[0] === i && cli.origen[1] === j);
 
-                // Ver si hay taxi en esta celda
-                let taxiAqui = Object.entries(taxis).find(([taxiId, taxi]) => taxi.posicion && taxi.posicion[0] === i && taxi.posicion[1] === j);
+                        if (taxiAqui) {
+                            clase += taxis[taxiAqui[0]].estado_taxi !== 'FREE' ? ' taxi-free' : ' taxi-busy';
+                            texto = taxiAqui[0];  // ID del taxi
+                        } else if (clienteAqui) {
+                            clase += ' cliente';
+                            texto = clienteAqui[0];  // ID del cliente
+                        } else if (typeof contenido === 'string' && contenido.match(/^[A-Z]$/)) {
+                            clase += ' location';
+                            texto = contenido;
+                        }
+                    %>
+                        <div class="<%= clase %>"><%= texto %></div>
+                    <% } %>
+                <% } %>
+            </div>
+        </div>
 
-                // Ver si hay cliente aquí
-                let clienteAqui = Object.entries(clientes).find(([cliId, cli]) => cli.origen && cli.origen[0] === i && cli.origen[1] === j);
+        <!-- Info + Auditoría -->
+        <div style="flex: 1;">
 
-                if (taxiAqui) {
-                    clase += taxis[taxiAqui[0]].estado_taxi === 'BUSY' ? ' taxi-free' : ' taxi-busy';
-                    texto = taxiAqui[0]; // ID del taxi
-                } else if (clienteAqui) {
-                    clase += ' cliente';
-                    texto = clienteAqui[0];  // ID del cliente
-                } else if (typeof contenido === 'string' && contenido.match(/^[A-Z]$/)) {
-                    clase += ' location';
-                    texto = contenido;
-                }
-            %>
-                <div class="<%= clase %>"><%= texto %></div>
-            <% } %>
-        <% } %>
+            <h2>Taxis activos</h2>
+            <table>
+                <tr><th>ID</th><th>Estado Taxi</th><th>Estado Sensor</th><th>Posición</th><th>Cliente</th></tr>
+                <% for (let id in taxis) { %>
+                    <tr>
+                        <td><%= id %></td>
+                        <td><%= taxis[id].estado_taxi %></td>
+                        <td><%= taxis[id].estado_sensor %></td>
+                        <td><%= taxis[id].posicion %></td>
+                        <td><%= taxis[id].cliente %></td>
+                    </tr>
+                <% } %>
+            </table>
+
+            <h2>Clientes activos</h2>
+            <table>
+                <tr><th>ID</th><th>Origen</th><th>Destino</th><th>Estado</th></tr>
+                <% for (let id in clientes) { %>
+                    <tr>
+                        <td><%= id %></td>
+                        <td><%= clientes[id].origen %></td>
+                        <td><%= clientes[id].destino %></td>
+                        <td><%= clientes[id].estado %></td>
+                    </tr>
+                <% } %>
+            </table>
+
+            <h2>Auditoría</h2>
+            <pre id="auditoria" class="auditoria"><%= auditoria %></pre>
+
+        </div>
     </div>
+    <script>
+        window.onload = function() {
+            const auditoriaDiv = document.getElementById('auditoria');
+            if (auditoriaDiv) {
+                auditoriaDiv.scrollTop = auditoriaDiv.scrollHeight;
+            }
+        }
+    </script>
+
 </body>
 </html>

@@ -167,7 +167,8 @@ class EC_Customer:
                 mensaje = {
                     'cliente_id': self.cliente_id,
                     'destino': destino_id,
-                    'origen': self.posicion
+                    'origen': self.posicion,
+                    'estado': 'OK'
                 }
                 try:
                     self.producer.send('cliente_solicitud', key=self.cliente_id.encode(),value=json.dumps(mensaje).encode())
@@ -176,6 +177,17 @@ class EC_Customer:
                     self.log(f"[Cliente {self.cliente_id}] Error al enviar solicitud: {e}")
                     self.solicitud_enviada = False
             else:
+                mensaje = {
+                    'cliente_id': self.cliente_id,
+                    'destino': 0,
+                    'origen': self.posicion,
+                    'estado': 'TERMINADO'
+                }
+                try:
+                    self.producer.send('cliente_solicitud', key=self.cliente_id.encode(),value=json.dumps(mensaje).encode())
+                except Exception as e:
+                    self.log(f"[Cliente {self.cliente_id}] Error al enviar solicitud: {e}")
+                    self.solicitud_enviada = False
                 self.log(f"[Cliente {self.cliente_id}] No hay más solicitudes pendientes.")
         else:
             self.log(f"[Cliente {self.cliente_id}] Ya se ha enviado una solicitud, en espera de una respuesta.")

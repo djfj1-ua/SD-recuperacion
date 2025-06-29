@@ -189,6 +189,7 @@ class EC_DE:
                                     else:
                                         self.estado_sensores[campos[2]] = False
                                     self.actualizar_estado_taxi()
+                                    self.enviar_estado_central()
                                 sensor_socket.send('ACK'.encode())
                                 #print(f"[Taxi] Estado del sensor actualizado: {self.sensor_status}")
                             else:
@@ -209,7 +210,7 @@ class EC_DE:
         #with self.lock:
         self.parar_taxi_sensor = any(self.estado_sensores.values())
         self.parar_taxi = self.parar_taxi_sensor or self.parar_taxi_central
-        #print(f"[Taxi] Estado del taxi {self.id_taxi} actualizado. Estado: {self.parar_taxi}")
+        print(f"[Taxi] Estado del taxi {self.id_taxi} actualizado. Estado: {self.parar_taxi}")
 
     def calcular_lrc(self, data):
         lrc = 0
@@ -307,7 +308,7 @@ class EC_DE:
                 'taxi_id': self.id_taxi,
                 'iv': iv,
                 'data': ciphertext
-}
+            }
             self.producer.send('taxi_estado', key=self.id_taxi.encode(), value=json.dumps(mensaje_cifrado).encode())
             self.producer.flush()
             print(f"[Taxi - {self.id_taxi}] Estado enviado a la Central: {mensaje}")

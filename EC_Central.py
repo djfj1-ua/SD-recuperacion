@@ -8,6 +8,7 @@ import ssl
 from flask import Flask, app, jsonify
 import logging
 import os
+from Crypto.Util.Padding import unpad
 import kafka
 from kafka import KafkaProducer, KafkaConsumer
 import tkinter as tk
@@ -201,37 +202,46 @@ class EC_Central:
                             destino_id = partes[2]
                             destino_coord = self.localizaciones.get(destino_id)
                             if destino_coord:
+                                with self.lock:
+                                    self.taxis_autenticados[taxi_id]['estado_taxi'] = 'RUN'  # <--- CAMBIO DE ESTADO AQUÍ
+                                    self.taxis_autenticados[taxi_id]['destino'] = destino_coord
                                 self.enviar_instrucciones_taxi(taxi_id, destino_coord)
+                                self.esperar_llegada_taxi(taxi_id, destino_coord)
+                                with self.lock:
+                                    self.taxis_autenticados[taxi_id]['estado_taxi'] = 'FREE'
+                                    self.taxis_autenticados[taxi_id]['destino'] = ''
+                                    self.taxis_autenticados[taxi_id]['cliente'] = ''
                             else:
                                 print(f"[CENTRAL] Destino {destino_id} no encontrado.")
                                 logging.warning(f"[CENTRAL] Destino {destino_id} no encontrado.")
                         elif comando == 'VOLVER_BASE':
                             #self.taxis_autenticados[taxi_id]['estado_taxi'] = 'FREE'
                             cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
-                            posicion_taxi = self.taxis_autenticados[taxi_id].get('posicion')
+                            if isinstance(cliente_id, str) and cliente_id.strip():
+                                posicion_taxi = self.taxis_autenticados[taxi_id].get('posicion')
 
-                            with self.lock:
-                                self.taxis_autenticados[taxi_id]['estado_taxi'] = 'FREE'
-                                self.taxis_autenticados[taxi_id]['destino'] = ''
-                                self.taxis_autenticados[taxi_id]['cliente'] = ''
+                                with self.lock:
+                                    self.taxis_autenticados[taxi_id]['estado_taxi'] = 'FREE'
+                                    self.taxis_autenticados[taxi_id]['destino'] = ''
+                                    self.taxis_autenticados[taxi_id]['cliente'] = ''
 
-                            if cliente_id:
-                                mensaje = {
-                                    'cliente_id': cliente_id,
-                                    'estado': 'ABANDONADO',
-                                    'posicion': posicion_taxi
-                                }
+                                if cliente_id:
+                                    mensaje = {
+                                        'cliente_id': cliente_id,
+                                        'estado': 'ABANDONADO',
+                                        'posicion': posicion_taxi
+                                    }
 
-                            try:
-                                self.producer.send('cliente_respuesta', key=cliente_id.encode(), value=json.dumps(mensaje).encode())
-                                self.producer.flush()
-                                logging.info(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
-                                print(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
-                            except Exception as e:
-                                logging.error(f"[CENTRAL] Error notificando al cliente {cliente_id}: {e}")
-                                print(f"[CENTRAL] Error notificando al cliente {cliente_id}: {e}")
-                                logging.info(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
-                                print(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
+                                try:
+                                    self.producer.send('cliente_respuesta', key=cliente_id.encode(), value=json.dumps(mensaje).encode())
+                                    self.producer.flush()
+                                    logging.info(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
+                                    print(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
+                                except Exception as e:
+                                    logging.error(f"[CENTRAL] Error notificando al cliente {cliente_id}: {e}")
+                                    print(f"[CENTRAL] Error notificando al cliente {cliente_id}: {e}")
+                                    logging.info(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
+                                    print(f"[CENTRAL] Cliente {cliente_id} notificado de abandono en {posicion_taxi}.")
 
 
                             self.enviar_instrucciones_taxi(taxi_id, (0, 0))
@@ -328,39 +338,43 @@ class EC_Central:
                 cliente_id = solicitud['cliente_id']
                 destino_coord = solicitud['destino']
                 origen_coord = solicitud['origen']
+                estado_cliente = solicitud['estado']
 
-                if cliente_id not in self.clientes_activos:
-                    print(f"Posicion del cliente {cliente_id}: {origen_coord}")
-                    logging.info(f"Posicion del cliente {cliente_id}: {origen_coord}")
-                    self.clientes_activos[cliente_id] = {
-                        'destino': destino_coord,
-                        'origen': origen_coord,
-                        'estado': 'OK'
-                    }
-                else:
-                    print(f"Posicion del cliente {cliente_id}: {origen_coord}")
-                    logging.info(f"Posicion del cliente {cliente_id}: {origen_coord}")
-                    self.clientes_activos[cliente_id] = {
-                        'destino': destino_coord,
-                        'origen': origen_coord,
-                        'estado': self.clientes_activos[cliente_id]["estado"]
-                    }
+                if estado_cliente == 'OK':
+                    if cliente_id not in self.clientes_activos:
+                        print(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                        logging.info(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                        self.clientes_activos[cliente_id] = {
+                            'destino': destino_coord,
+                            'origen': origen_coord,
+                            'estado': 'OK'
+                        }
+                    else:
+                        print(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                        logging.info(f"Posicion del cliente {cliente_id}: {origen_coord}")
+                        self.clientes_activos[cliente_id] = {
+                            'destino': destino_coord,
+                            'origen': origen_coord,
+                            'estado': self.clientes_activos[cliente_id]["estado"]
+                        }
 
-                print(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
-                logging.info(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
-    
-                taxi_id = self.unir_taxi_cliente(cliente_id, destino_coord)
-                if taxi_id:
-                    self.enviar_mensaje_cliente(cliente_id, 'OK')
-                    #self.llevar_taxi_a_cliente(taxi_id, cliente_id, destino_coord, origen_coord)
-                    self.clientes_activos[cliente_id]["estado"] = 'OK'
-                    threading.Thread(target=self.llevar_taxi_a_cliente, args=(taxi_id, cliente_id, destino_coord, origen_coord), daemon=True).start()
+                    print(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
+                    logging.info(f"[EC_Central] Cliente {cliente_id} solicita taxi de {origen_coord} a {destino_coord}")
+        
+                    taxi_id = self.unir_taxi_cliente(cliente_id, destino_coord)
+                    if taxi_id:
+                        self.enviar_mensaje_cliente(cliente_id, 'OK')
+                        #self.llevar_taxi_a_cliente(taxi_id, cliente_id, destino_coord, origen_coord)
+                        self.clientes_activos[cliente_id]["estado"] = 'OK'
+                        threading.Thread(target=self.llevar_taxi_a_cliente, args=(taxi_id, cliente_id, destino_coord, origen_coord), daemon=True).start()
+                    else:
+                        print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
+                        logging.info(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
+                        self.enviar_mensaje_cliente(cliente_id, 'KO')
+                        self.clientes_activos[cliente_id]["estado"] = 'ESPERA'
+                        #del self.clientes_activos[cliente_id]  # Eliminar cliente si no hay taxi disponible
                 else:
-                    print(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
-                    logging.info(f"El taxi asignado al cliente {cliente_id} es: {taxi_id}")
-                    self.enviar_mensaje_cliente(cliente_id, 'KO')
-                    self.clientes_activos[cliente_id]["estado"] = 'ESPERA'
-                    #del self.clientes_activos[cliente_id]  # Eliminar cliente si no hay taxi disponible
+                    self.clientes_activos[cliente_id]["estado"] = 'TERMINADO'
             except json.JSONDecodeError as e:
                 print(f"[EC_Central] Error al procesar el mensaje: {e}")
                 logging.error(f"[EC_Central] Error al procesar el mensaje: {e}")
@@ -404,7 +418,6 @@ class EC_Central:
     def escuchar_estado_taxis(self):
         for mensaje in self.consumerTaxiEstado:
             try:
-
                 valor = json.loads(mensaje.value.decode())
                 iv = base64.urlsafe_b64decode(valor['iv'])
                 ciphertext = base64.urlsafe_b64decode(valor['data'])
@@ -417,6 +430,7 @@ class EC_Central:
                     continue
                 cipher = AES.new(base64.urlsafe_b64decode(shared_key), AES.MODE_CBC, iv=iv)
                 plaintext = cipher.decrypt(ciphertext)
+                plaintext = unpad(plaintext, AES.block_size)
                 plaintext_json = json.loads(plaintext.decode().strip())  # Aquí ya tienes el JSON original con "estado"
 
                 estado = plaintext_json['estado']  # Ahora sí puedes acceder sin error
@@ -426,8 +440,8 @@ class EC_Central:
                     if taxi_id in self.taxis_autenticados:
                         self.taxis_autenticados[taxi_id]['estado_sensor'] = estado
                         self.taxis_autenticados[taxi_id]['posicion'] = posicion
-                        logging.info(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
-                        print(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
+                        #logging.info(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
+                        #print(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
 
                         cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
                         if cliente_id and cliente_id in self.clientes_activos and self.taxis_autenticados[taxi_id]['estado_taxi'] == 'BUSY':
@@ -709,6 +723,16 @@ class EC_Central:
                     "clientes": self.clientes_activos,
                     "mapa": self.mapa
                 })
+            
+        
+        @app.route('/auditoria', methods=['GET'])
+        def obtener_auditoria():
+            try:
+                with open('auditoria.log', 'r') as f:
+                    contenido = f.read()
+                return jsonify({"auditoria": contenido})
+            except Exception as e:
+                return jsonify({"error": str(e)}), 500
 
         app.run(host='0.0.0.0', port=8000, debug=False, use_reloader=False, threaded=True)
 
