@@ -2,7 +2,7 @@
 setlocal EnableDelayedExpansion
 
 :: Configura cuántos taxis y sensores por taxi deseas
-set NUM_TAXIS=3
+set NUM_TAXIS=1
 set NUM_SENSORES=1
 
 :: Configuración base
