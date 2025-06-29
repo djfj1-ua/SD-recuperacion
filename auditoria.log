@@ -8878,3 +8878,777 @@ ConnectionAbortedError: [WinError 10053] Se ha anulado una conexión establecida 
 [2025-06-29 18:07:13] INFO: 127.0.0.1 - - [29/Jun/2025 18:07:13] "GET /estado HTTP/1.1" 200 -
 [2025-06-29 18:07:14] INFO: Closing the Kafka producer with 0 secs timeout.
 [2025-06-29 18:07:14] INFO: Proceeding to force close the producer since pending requests could not be completed within timeout 0.
+[2025-06-29 18:22:55] INFO: ===== Inicio de ejecución de EC_Central =====
+[2025-06-29 18:22:55] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:55] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 18:22:55] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:55] INFO: Broker version identified as 2.6.0
+[2025-06-29 18:22:55] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 18:22:55] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:55] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 18:22:55] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:55] INFO: Broker version identified as 2.6.0
+[2025-06-29 18:22:55] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 18:22:55] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 18:22:55] INFO: Updating subscribed topics to: ('cliente_solicitud',)
+[2025-06-29 18:22:55] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:55] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 18:22:55] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:56] INFO: Broker version identified as 2.6.0
+[2025-06-29 18:22:56] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 18:22:56] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 18:22:56] INFO: Updating subscribed topics to: ('taxi_instrucciones',)
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:56] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:56] INFO: Broker version identified as 2.6.0
+[2025-06-29 18:22:56] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 18:22:56] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 18:22:56] INFO: Updating subscribed topics to: ('taxi_estado',)
+[2025-06-29 18:22:56] INFO: Taxi 9 cargado con posición [0, 0] y estado FREE.
+[2025-06-29 18:22:56] INFO: Taxis cargados correctamente.
+[2025-06-29 18:22:56] INFO: Updated partition assignment: [TopicPartition(topic='cliente_solicitud', partition=0)]
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 18:22:56] INFO: Updated partition assignment: [TopicPartition(topic='taxi_estado', partition=0)]
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 18:22:56] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 18:22:57] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.44:8000
+[2025-06-29 18:22:57] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-29 18:26:11] INFO: [EC_Central] Conexión de taxi desde ('192.168.1.40', 49218)
+[2025-06-29 18:26:11] INFO: [EC_Central] Taxi 1 autenticado.
+[2025-06-29 18:26:18] INFO: [EC_Central] Conexión de taxi desde ('192.168.1.40', 49223)
+[2025-06-29 18:26:18] INFO: [EC_Central] Taxi 2 autenticado.
+[2025-06-29 18:26:24] INFO: [EC_Central] Conexión de taxi desde ('192.168.1.40', 49230)
+[2025-06-29 18:26:24] INFO: [EC_Central] Taxi 3 autenticado.
+[2025-06-29 18:27:56] INFO: Posicion del cliente 1: [8, 8]
+[2025-06-29 18:27:56] INFO: [EC_Central] Cliente 1 solicita taxi de [8, 8] a A
+[2025-06-29 18:27:56] INFO:   Taxi 1: FREE
+[2025-06-29 18:27:56] INFO: Taxi 1 asignado al cliente 1 con destino A.
+[2025-06-29 18:27:57] INFO: Taxi 1 se dirige a recoger al cliente 1 en [8, 8].
+[2025-06-29 18:28:10] INFO: 127.0.0.1 - - [29/Jun/2025 18:28:10] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 18:28:12] INFO: [EC_Central] Taxi 1 ha llegado a su destino [8, 8].
+[2025-06-29 18:28:12] INFO: Taxi 1 ha llegado a [8, 8] para recoger al cliente.
+[2025-06-29 18:28:12] INFO: Taxi 1 llevando al cliente 1 a A.
+[2025-06-29 18:28:20] INFO: 127.0.0.1 - - [29/Jun/2025 18:28:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 18:28:21] INFO: 127.0.0.1 - - [29/Jun/2025 18:28:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 18:28:21] INFO: 127.0.0.1 - - [29/Jun/2025 18:28:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 18:28:22] INFO: [EC_Central] Taxi 1 ha llegado a su destino (5, 3).
+[2025-06-29 18:28:22] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 18:28:26] INFO: Posicion del cliente 1: [5, 3]
+[2025-06-29 18:28:26] INFO: [EC_Central] Cliente 1 solicita taxi de [5, 3] a C
+[2025-06-29 18:28:26] INFO:   Taxi 1: FREE
+[2025-06-29 18:28:26] INFO: Taxi 1 asignado al cliente 1 con destino C.
+[2025-06-29 18:28:26] INFO: 127.0.0.1 - - [29/Jun/2025 18:28:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 18:28:27] INFO: Taxi 1 se dirige a recoger al cliente 1 en [5, 3].
+[2025-06-29 18:28:27] INFO: [EC_Central] Taxi 1 ha llegado a su destino [5, 3].
+[2025-06-29 18:28:27] INFO: Taxi 1 ha llegado a [5, 3] para recoger al cliente.
+[2025-06-29 18:28:28] INFO: Taxi 1 llevando al cliente 1 a C.
+[2025-06-29 18:28:53] INFO: [EC_Central] Taxi 1 ha llegado a su destino (8, 16).
+[2025-06-29 18:28:53] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 18:29:41] INFO: [EC_Central] Taxi 1 ha llegado a su destino (5, 3).
+[2025-06-29 18:30:37] WARNING: [EC_Central] Tiempo de espera agotado para el taxi 1 en destino (17, 16)
+[2025-06-29 18:31:42] INFO: Posicion del cliente 2: [8, 8]
+[2025-06-29 18:31:42] INFO: [EC_Central] Cliente 2 solicita taxi de [8, 8] a F
+[2025-06-29 18:31:42] INFO:   Taxi 1: FREE
+[2025-06-29 18:31:42] INFO: Taxi 1 asignado al cliente 2 con destino F.
+[2025-06-29 18:31:42] INFO: Taxi 1 se dirige a recoger al cliente 2 en [8, 8].
+[2025-06-29 18:31:59] INFO: [EC_Central] Taxi 1 ha llegado a su destino [8, 8].
+[2025-06-29 18:31:59] INFO: Taxi 1 ha llegado a [8, 8] para recoger al cliente.
+[2025-06-29 18:32:00] INFO: Taxi 1 llevando al cliente 2 a F.
+[2025-06-29 18:32:05] INFO: [EC_Central] Taxi 1 ha llegado a su destino (11, 5).
+[2025-06-29 18:32:06] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 18:32:10] INFO: Posicion del cliente 2: [11, 5]
+[2025-06-29 18:32:10] INFO: [EC_Central] Cliente 2 solicita taxi de [11, 5] a B
+[2025-06-29 18:32:10] INFO:   Taxi 1: FREE
+[2025-06-29 18:32:10] INFO: Taxi 1 asignado al cliente 2 con destino B.
+[2025-06-29 18:32:10] INFO: Taxi 1 se dirige a recoger al cliente 2 en [11, 5].
+[2025-06-29 18:32:11] INFO: [EC_Central] Taxi 1 ha llegado a su destino [11, 5].
+[2025-06-29 18:32:11] INFO: Taxi 1 ha llegado a [11, 5] para recoger al cliente.
+[2025-06-29 18:32:12] INFO: Taxi 1 llevando al cliente 2 a B.
+[2025-06-29 18:32:28] INFO: [EC_Central] Taxi 1 ha llegado a su destino (2, 11).
+[2025-06-29 18:32:29] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 18:35:42] ERROR: [EC_Central] Error al consultar EC_CTC: HTTPConnectionPool(host='192.168.1.40', port=5000): Max retries exceeded with url: /consulta (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C275D92A80>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:42] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DA90A0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:42] ERROR: [EC_Central] Clave del taxi 1 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:44] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DA8B90>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:44] ERROR: [EC_Central] Clave del taxi 3 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:46] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275D913D0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:46] ERROR: [EC_Central] Clave del taxi 2 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:49] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275412990>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:49] ERROR: [EC_Central] Clave del taxi 3 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:51] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DA9610>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:51] ERROR: [EC_Central] Clave del taxi 1 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:53] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DA9B80>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:53] ERROR: [EC_Central] Clave del taxi 2 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:54] ERROR: [EC_Central] Error al consultar EC_CTC: HTTPConnectionPool(host='192.168.1.40', port=5000): Max retries exceeded with url: /consulta (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C275DAA900>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:56] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275608A40>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:56] ERROR: [EC_Central] Clave del taxi 3 no encontrada. Ignorando mensaje.
+[2025-06-29 18:35:58] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275D91220>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:35:58] ERROR: [EC_Central] Clave del taxi 2 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:00] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DAA5A0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:00] ERROR: [EC_Central] Clave del taxi 1 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:02] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275D758B0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:02] ERROR: [EC_Central] Clave del taxi 3 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:04] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275633FE0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:04] ERROR: [EC_Central] Clave del taxi 1 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:06] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DAA5D0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:06] ERROR: [EC_Central] Clave del taxi 2 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:06] ERROR: [EC_Central] Error al consultar EC_CTC: HTTPConnectionPool(host='192.168.1.40', port=5000): Max retries exceeded with url: /consulta (Caused by NewConnectionError('<urllib3.connection.HTTPConnection object at 0x000001C275DAA1E0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:08] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DA9FD0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:08] ERROR: [EC_Central] Clave del taxi 3 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:11] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275D74BC0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:11] ERROR: [EC_Central] Clave del taxi 2 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:15] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275D91220>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:15] ERROR: [EC_Central] Clave del taxi 3 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:17] ERROR: [EC_Central] Error obteniendo clave de Registry: HTTPSConnectionPool(host='192.168.1.40', port=5001): Max retries exceeded with url: /get_taxi_key (Caused by NewConnectionError('<urllib3.connection.HTTPSConnection object at 0x000001C275DAA6C0>: Failed to establish a new connection: [WinError 10061] No se puede establecer una conexión ya que el equipo de destino denegó expresamente dicha conexión'))
+[2025-06-29 18:36:17] ERROR: [EC_Central] Clave del taxi 2 no encontrada. Ignorando mensaje.
+[2025-06-29 18:36:17] INFO: Closing the Kafka producer with 0 secs timeout.
+[2025-06-29 18:36:17] INFO: Proceeding to force close the producer since pending requests could not be completed within timeout 0.
+[2025-06-29 20:18:23] INFO: ===== Inicio de ejecución de EC_Central =====
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:18:23] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:18:23] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:18:23] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:18:23] INFO: Updating subscribed topics to: ('cliente_solicitud',)
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:18:23] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:18:23] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:18:23] INFO: Updating subscribed topics to: ('taxi_instrucciones',)
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:18:23] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:18:23] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:18:23] INFO: Updating subscribed topics to: ('taxi_estado',)
+[2025-06-29 20:18:23] INFO: Taxi 9 cargado con posición [0, 0] y estado FREE.
+[2025-06-29 20:18:23] INFO: Taxis cargados correctamente.
+[2025-06-29 20:18:23] INFO: Updated partition assignment: [TopicPartition(topic='cliente_solicitud', partition=0)]
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:18:23] INFO: Updated partition assignment: [TopicPartition(topic='taxi_estado', partition=0)]
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:18:23] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:18:24] INFO: [31m[1mWARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.[0m
+ * Running on all addresses (0.0.0.0)
+ * Running on http://127.0.0.1:8000
+ * Running on http://192.168.1.44:8000
+[2025-06-29 20:18:24] INFO: [33mPress CTRL+C to quit[0m
+[2025-06-29 20:19:57] INFO: [EC_Central] Conexión de taxi desde ('192.168.1.40', 49897)
+[2025-06-29 20:19:57] INFO: [EC_Central] Taxi 2 autenticado.
+[2025-06-29 20:22:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:30] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:30] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:41] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:41] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:44] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:44] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:22:59] INFO: Posicion del cliente 1: [8, 8]
+[2025-06-29 20:22:59] INFO: [EC_Central] Cliente 1 solicita taxi de [8, 8] a A
+[2025-06-29 20:22:59] INFO:   Taxi 2: FREE
+[2025-06-29 20:22:59] INFO: Taxi 2 asignado al cliente 1 con destino A.
+[2025-06-29 20:22:59] INFO: Taxi 2 se dirige a recoger al cliente 1 en [8, 8].
+[2025-06-29 20:22:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:22:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:03] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:03] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:05] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:05] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:10] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:10] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:13] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:13] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:14] INFO: [EC_Central] Taxi 2 ha llegado a su destino [8, 8].
+[2025-06-29 20:23:14] INFO: Taxi 2 ha llegado a [8, 8] para recoger al cliente.
+[2025-06-29 20:23:15] INFO: Taxi 2 llevando al cliente 1 a A.
+[2025-06-29 20:23:15] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:15] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:24] INFO: [EC_Central] Taxi 2 ha llegado a su destino (5, 3).
+[2025-06-29 20:23:25] INFO: [DEBUG] Taxi 2 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 20:23:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:27] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:27] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:29] INFO: Posicion del cliente 1: [5, 3]
+[2025-06-29 20:23:29] INFO: [EC_Central] Cliente 1 solicita taxi de [5, 3] a C
+[2025-06-29 20:23:29] INFO:   Taxi 2: FREE
+[2025-06-29 20:23:29] INFO: Taxi 2 asignado al cliente 1 con destino C.
+[2025-06-29 20:23:29] INFO: Taxi 2 se dirige a recoger al cliente 1 en [5, 3].
+[2025-06-29 20:23:30] INFO: [EC_Central] Taxi 2 ha llegado a su destino [5, 3].
+[2025-06-29 20:23:30] INFO: Taxi 2 ha llegado a [5, 3] para recoger al cliente.
+[2025-06-29 20:23:30] INFO: Taxi 2 llevando al cliente 1 a C.
+[2025-06-29 20:23:30] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:30] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:55] INFO: [EC_Central] Taxi 2 ha llegado a su destino (8, 16).
+[2025-06-29 20:23:56] INFO: [DEBUG] Taxi 2 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 20:23:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:23:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:23:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:03] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:03] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:05] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:05] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:13] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:13] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:15] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:15] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:21] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:26] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:35] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:35] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:41] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:41] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:44] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:44] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:57] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:57] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:24:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:24:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:00] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:00] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:03] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:03] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:05] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:05] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:05] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:05] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:10] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:10] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:13] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:13] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:15] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:15] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:19] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:19] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:21] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:24] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:24] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:26] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:27] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:27] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:30] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:30] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:32] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:32] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:35] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:35] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:40] ERROR: [CENTRAL] Taxi 1 no está autenticado.
+[2025-06-29 20:25:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:44] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:44] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:25:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:25:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:00] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:00] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:03] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:03] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:10] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:10] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:15] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:15] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:19] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:19] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:24] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:24] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:24] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:24] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:26] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:32] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:32] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:35] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:35] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:41] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:41] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:26:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:26:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:13] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:13] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:19] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:19] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:21] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:22] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:22] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:24] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:24] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:27] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:27] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:27] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:27] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:30] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:30] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:32] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:32] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:35] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:35] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:41] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:41] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:44] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:44] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:57] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:57] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:27:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:27:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:00] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:00] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:00] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:00] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:03] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:03] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:05] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:05] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:10] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:10] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:13] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:13] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:15] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:15] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:19] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:19] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:19] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:19] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:21] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:26] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:26] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:30] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:30] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:32] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:32] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:33] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:33] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:35] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:35] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:35] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:35] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:38] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:38] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:41] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:41] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:44] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:44] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:45] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:45] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:57] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:57] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:58] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:58] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:28:59] INFO: 127.0.0.1 - - [29/Jun/2025 20:28:59] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:00] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:00] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:01] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:01] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:02] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:02] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:03] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:03] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:04] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:04] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:05] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:05] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:06] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:06] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:07] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:07] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:08] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:08] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:09] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:09] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:10] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:10] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:11] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:11] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:12] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:12] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:13] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:13] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:14] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:14] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:15] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:15] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:16] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:16] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:17] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:17] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:18] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:18] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:19] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:19] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:20] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:20] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:21] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:21] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:23] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:23] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:24] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:24] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:25] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:25] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:26] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:26] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:27] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:27] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:28] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:28] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:29] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:29] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:31] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:31] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:32] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:32] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:32] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:32] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:34] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:34] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:36] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:36] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:37] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:37] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:39] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:39] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:40] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:40] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:41] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:41] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:42] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:42] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:43] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:43] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:44] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:44] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:46] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:46] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:47] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:47] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:48] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:48] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:49] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:49] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:50] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:50] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:51] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:51] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:52] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:52] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:53] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:53] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:54] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:54] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:55] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:55] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:56] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:56] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:57] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:57] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:57] INFO: 127.0.0.1 - - [29/Jun/2025 20:29:57] "GET /estado HTTP/1.1" 200 -
+[2025-06-29 20:29:58] INFO: Closing the Kafka producer with 0 secs timeout.
+[2025-06-29 20:29:58] INFO: Proceeding to force close the producer since pending requests could not be completed within timeout 0.
+[2025-06-29 20:36:44] INFO: ===== Inicio de ejecución de EC_Central =====
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:36:44] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:36:44] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:36:44] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:36:44] INFO: Updating subscribed topics to: ('cliente_solicitud',)
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:36:44] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:36:44] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:36:44] INFO: Updating subscribed topics to: ('taxi_instrucciones',)
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:36:44] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:36:44] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:36:44] INFO: Updating subscribed topics to: ('taxi_estado',)
+[2025-06-29 20:36:44] INFO: Taxi 9 cargado con posición [0, 0] y estado FREE.
+[2025-06-29 20:36:44] INFO: Taxis cargados correctamente.
+[2025-06-29 20:36:44] INFO: Updated partition assignment: [TopicPartition(topic='cliente_solicitud', partition=0)]
+[2025-06-29 20:36:44] INFO: Updated partition assignment: [TopicPartition(topic='taxi_estado', partition=0)]
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:36:44] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:37:30] INFO: [EC_Central] Conexión de taxi desde ('192.168.1.40', 50618)
+[2025-06-29 20:37:30] INFO: [EC_Central] Taxi 1 autenticado.
+[2025-06-29 20:37:41] INFO: Posicion del cliente 1: [8, 8]
+[2025-06-29 20:37:41] INFO: [EC_Central] Cliente 1 solicita taxi de [8, 8] a A
+[2025-06-29 20:37:41] INFO:   Taxi 1: FREE
+[2025-06-29 20:37:41] INFO: Taxi 1 asignado al cliente 1 con destino A.
+[2025-06-29 20:37:42] INFO: Taxi 1 se dirige a recoger al cliente 1 en [8, 8].
+[2025-06-29 20:37:57] INFO: [EC_Central] Taxi 1 ha llegado a su destino [8, 8].
+[2025-06-29 20:37:57] INFO: Taxi 1 ha llegado a [8, 8] para recoger al cliente.
+[2025-06-29 20:37:57] INFO: Taxi 1 llevando al cliente 1 a A.
+[2025-06-29 20:38:07] INFO: [EC_Central] Taxi 1 ha llegado a su destino (5, 3).
+[2025-06-29 20:38:07] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 20:38:11] INFO: Posicion del cliente 1: [5, 3]
+[2025-06-29 20:38:11] INFO: [EC_Central] Cliente 1 solicita taxi de [5, 3] a C
+[2025-06-29 20:38:11] INFO:   Taxi 1: FREE
+[2025-06-29 20:38:11] INFO: Taxi 1 asignado al cliente 1 con destino C.
+[2025-06-29 20:38:12] INFO: Taxi 1 se dirige a recoger al cliente 1 en [5, 3].
+[2025-06-29 20:38:13] INFO: [EC_Central] Taxi 1 ha llegado a su destino [5, 3].
+[2025-06-29 20:38:13] INFO: Taxi 1 ha llegado a [5, 3] para recoger al cliente.
+[2025-06-29 20:38:13] INFO: Taxi 1 llevando al cliente 1 a C.
+[2025-06-29 20:38:23] INFO: Closing the Kafka producer with 0 secs timeout.
+[2025-06-29 20:38:23] INFO: Proceeding to force close the producer since pending requests could not be completed within timeout 0.
+[2025-06-29 20:41:53] INFO: ===== Inicio de ejecución de EC_Central =====
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:41:53] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:41:53] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:41:53] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:41:53] INFO: Updating subscribed topics to: ('cliente_solicitud',)
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:41:53] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:41:53] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:41:53] INFO: Updating subscribed topics to: ('taxi_instrucciones',)
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: Probing node bootstrap-0 broker version
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: Broker version identified as 2.6.0
+[2025-06-29 20:41:53] INFO: Set configuration api_version=(2, 6, 0) to skip auto check_version requests on startup
+[2025-06-29 20:41:53] WARNING: group_id is None: disabling auto-commit.
+[2025-06-29 20:41:53] INFO: Updating subscribed topics to: ('taxi_estado',)
+[2025-06-29 20:41:53] INFO: Taxi 9 cargado con posición [0, 0] y estado FREE.
+[2025-06-29 20:41:53] INFO: Taxis cargados correctamente.
+[2025-06-29 20:41:53] INFO: Updated partition assignment: [TopicPartition(topic='cliente_solicitud', partition=0)]
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: Updated partition assignment: [TopicPartition(topic='taxi_estado', partition=0)]
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: connecting to 192.168.1.44:9092 [('192.168.1.44', 9092) IPv4]
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=0 host=192.168.1.44:9092 <connecting> [IPv4 ('192.168.1.44', 9092)]>: Connection complete.
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:41:53] INFO: <BrokerConnection node_id=bootstrap-0 host=192.168.1.44:9092 <connected> [IPv4 ('192.168.1.44', 9092)]>: Closing connection. 
+[2025-06-29 20:41:59] INFO: [EC_Central] Conexión de taxi desde ('192.168.1.40', 50724)
+[2025-06-29 20:41:59] INFO: [EC_Central] Taxi 1 autenticado.
+[2025-06-29 20:42:07] INFO: Posicion del cliente 1: [8, 8]
+[2025-06-29 20:42:07] INFO: [EC_Central] Cliente 1 solicita taxi de [8, 8] a A
+[2025-06-29 20:42:07] INFO:   Taxi 1: FREE
+[2025-06-29 20:42:07] INFO: Taxi 1 asignado al cliente 1 con destino A.
+[2025-06-29 20:42:07] INFO: Taxi 1 se dirige a recoger al cliente 1 en [8, 8].
+[2025-06-29 20:42:22] INFO: [EC_Central] Taxi 1 ha llegado a su destino [8, 8].
+[2025-06-29 20:42:22] INFO: Taxi 1 ha llegado a [8, 8] para recoger al cliente.
+[2025-06-29 20:42:23] INFO: Taxi 1 llevando al cliente 1 a A.
+[2025-06-29 20:42:32] INFO: [EC_Central] Taxi 1 ha llegado a su destino (5, 3).
+[2025-06-29 20:42:33] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 20:42:37] INFO: Posicion del cliente 1: [5, 3]
+[2025-06-29 20:42:37] INFO: [EC_Central] Cliente 1 solicita taxi de [5, 3] a C
+[2025-06-29 20:42:37] INFO:   Taxi 1: FREE
+[2025-06-29 20:42:37] INFO: Taxi 1 asignado al cliente 1 con destino C.
+[2025-06-29 20:42:37] INFO: Taxi 1 se dirige a recoger al cliente 1 en [5, 3].
+[2025-06-29 20:42:38] INFO: [EC_Central] Taxi 1 ha llegado a su destino [5, 3].
+[2025-06-29 20:42:38] INFO: Taxi 1 ha llegado a [5, 3] para recoger al cliente.
+[2025-06-29 20:42:38] INFO: Taxi 1 llevando al cliente 1 a C.
+[2025-06-29 20:43:03] INFO: [EC_Central] Taxi 1 ha llegado a su destino (8, 16).
+[2025-06-29 20:43:04] INFO: [DEBUG] Taxi 1 marcado como FREE después de entregar al cliente. ->> FREE
+[2025-06-29 20:44:05] INFO: [EC_Central] Taxi 1 ha llegado a su destino (5, 3).
+[2025-06-29 20:44:43] INFO: Closing the Kafka producer with 0 secs timeout.
+[2025-06-29 20:44:43] INFO: Proceeding to force close the producer since pending requests could not be completed within timeout 0.

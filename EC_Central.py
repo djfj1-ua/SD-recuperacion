@@ -31,6 +31,9 @@ LOG_FILE = 'auditoria.log'
 # if os.path.exists(LOG_FILE):
 #     os.remove(LOG_FILE)
 
+log = logging.getLogger('werkzeug')
+log.setLevel(logging.ERROR)  # Solo errores, no logs de cada GET
+
 logging.basicConfig(
     filename=LOG_FILE,
     level=logging.INFO,
@@ -310,7 +313,7 @@ class EC_Central:
         while True:
             time.sleep(10)  # Revisa cada 10 segundos
             try:
-                respuesta = requests.get("http://127.0.0.1:5000/consulta").json()
+                respuesta = requests.get("http://192.168.1.40:5000/consulta").json()
                 nuevo_estado = respuesta["estado"]
 
                 # Si cambia el estado, actualízalo
@@ -424,7 +427,6 @@ class EC_Central:
                 valor = json.loads(mensaje.value.decode())
                 taxi_id = valor['taxi_id']
 
-                # ✅ SOLO PROCESAR SI EL TAXI ESTÁ AUTENTICADO
                 if taxi_id not in self.taxis_autenticados:#Ingora el taxi si no esta autenticado
                     continue
 

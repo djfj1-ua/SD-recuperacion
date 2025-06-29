@@ -11,7 +11,7 @@ app.use(express.static('public'));
 app.get('/', async (req, res) => {
     try {
         const centralEstado = await axios.get('http://127.0.0.1:8000/estado');
-        const ctcEstado = await axios.get('http://127.0.0.1:5000/consulta');
+        const ctcEstado = await axios.get('http://192.168.1.40:5000/consulta');
 
         const { taxis, clientes, mapa } = centralEstado.data;
         const estadoCTC = ctcEstado.data.estado;
@@ -51,7 +51,7 @@ app.get('/auditoria', async (req, res) => {
 app.get('/api/estado', async (req, res) => {
     try {
         const centralEstado = await axios.get('http://127.0.0.1:8000/estado');
-        const ctcEstado = await axios.get('http://127.0.0.1:5000/consulta');
+        const ctcEstado = await axios.get('http://192.168.1.40:5000/consulta');
 
         const { taxis, clientes, mapa } = centralEstado.data;
         const estadoCTC = ctcEstado.data.estado;
@@ -69,6 +69,7 @@ app.get('/api/estado', async (req, res) => {
 });
 
 
-app.listen(PORT, () => {
-    console.log(`Frontend EasyCab corriendo en http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`Frontend EasyCab corriendo en http://0.0.0.0:${PORT}`);
 });
+
