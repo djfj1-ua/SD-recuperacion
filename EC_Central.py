@@ -16,6 +16,10 @@ from Crypto.Cipher import AES
 from flask_cors import CORS
 import requests
 
+import urllib3
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+
 # ========================
 # CONFIGURACIÓN DE AUDITORÍA (LOGGING)
 # ========================
@@ -35,8 +39,6 @@ logging.basicConfig(
 )
 
 logging.info("===== Inicio de ejecución de EC_Central =====")
-
-SERVER = socket.gethostbyname(socket.gethostname())
 
 app = Flask(__name__)
 CORS(app)  # Permite peticiones desde el Frontend (localhost:3000, etc.)
@@ -72,8 +74,9 @@ class EC_Central:
 
     def iniciar_servidor_taxis(self):
 
-        context = ssl.create_default_context(ssl.Purpose.CLIENT_AUTH)
+        context = ssl.SSLContext(ssl.PROTOCOL_TLS_SERVER)
         context.load_cert_chain(certfile="server.crt", keyfile="server.key")
+
 
         raw_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         raw_socket.bind((SERVER, self.puerto))
@@ -281,7 +284,7 @@ class EC_Central:
 
     def verificar_taxi_en_registry(self, id_taxi):
         try:#Cambiar ip por la de DE
-            response = requests.get("https://127.0.0.1:5001/list_taxis", verify="ca.crt")
+            response = requests.get("https://192.168.1.40:5001/list_taxis", verify="")
             if response.status_code == 200:
                 taxis_registrados = response.json().get("taxis", [])
                 return id_taxi in taxis_registrados
@@ -399,8 +402,8 @@ class EC_Central:
 
     def obtener_clave_compartida_del_taxi(self, taxi_id):
         try:
-            url = "https://127.0.0.1:5001/get_taxi_key"
-            response = requests.post(url, json={"id": taxi_id}, verify="ca.crt")
+            url = "https://192.168.1.40:5001/get_taxi_key"
+            response = requests.post(url, json={"id": taxi_id}, verify="registry.crt")
             if response.status_code == 200:
                 key = response.json().get("key")
                 self.claves_taxis[taxi_id] = key
@@ -419,37 +422,41 @@ class EC_Central:
         for mensaje in self.consumerTaxiEstado:
             try:
                 valor = json.loads(mensaje.value.decode())
+                taxi_id = valor['taxi_id']
+
+                # ✅ SOLO PROCESAR SI EL TAXI ESTÁ AUTENTICADO
+                if taxi_id not in self.taxis_autenticados:#Ingora el taxi si no esta autenticado
+                    continue
+
                 iv = base64.urlsafe_b64decode(valor['iv'])
                 ciphertext = base64.urlsafe_b64decode(valor['data'])
 
-                # Aquí deberías tener la clave compartida del taxi correspondiente
-                shared_key = self.obtener_clave_compartida_del_taxi(valor['taxi_id'])  # <-- Implementa esto según tu central
+                shared_key = self.obtener_clave_compartida_del_taxi(taxi_id)
                 if shared_key is None:
-                    print(f"[EC_Central] Clave del taxi {valor['taxi_id']} no encontrada. Ignorando mensaje.")
-                    logging.error(f"[EC_Central] Clave del taxi {valor['taxi_id']} no encontrada. Ignorando mensaje.")
+                    print(f"[EC_Central] Clave del taxi {taxi_id} no encontrada. Ignorando mensaje.")
+                    logging.error(f"[EC_Central] Clave del taxi {taxi_id} no encontrada. Ignorando mensaje.")
                     continue
+
                 cipher = AES.new(base64.urlsafe_b64decode(shared_key), AES.MODE_CBC, iv=iv)
                 plaintext = cipher.decrypt(ciphertext)
                 plaintext = unpad(plaintext, AES.block_size)
-                plaintext_json = json.loads(plaintext.decode().strip())  # Aquí ya tienes el JSON original con "estado"
+                plaintext_json = json.loads(plaintext.decode().strip())
 
-                estado = plaintext_json['estado']  # Ahora sí puedes acceder sin error
-                taxi_id = plaintext_json['taxi_id']
+                estado = plaintext_json['estado']
                 posicion = plaintext_json['posicion']
-                with self.lock:
-                    if taxi_id in self.taxis_autenticados:
-                        self.taxis_autenticados[taxi_id]['estado_sensor'] = estado
-                        self.taxis_autenticados[taxi_id]['posicion'] = posicion
-                        #logging.info(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
-                        #print(f"[EC_Central] Estado del taxi {taxi_id} actualizado: {estado}, Posición: {posicion}")
 
-                        cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
-                        if cliente_id and cliente_id in self.clientes_activos and self.taxis_autenticados[taxi_id]['estado_taxi'] == 'BUSY':
-                            self.clientes_activos[cliente_id]['origen'] = posicion
+                with self.lock:
+                    self.taxis_autenticados[taxi_id]['estado_sensor'] = estado
+                    self.taxis_autenticados[taxi_id]['posicion'] = posicion
+
+                    cliente_id = self.taxis_autenticados[taxi_id].get('cliente')
+                    if cliente_id and cliente_id in self.clientes_activos and self.taxis_autenticados[taxi_id]['estado_taxi'] == 'BUSY':
+                        self.clientes_activos[cliente_id]['origen'] = posicion
 
             except Exception as e:
                 print(f"[EC_Central] Error procesando mensaje de taxi_estado: {e}")
                 logging.error(f"[EC_Central] Error procesando mensaje de taxi_estado: {e}")
+
 
     def esperar_llegada_taxi(self, taxi_id, destino, timeout=30):
         start_time = time.time()
@@ -749,6 +756,8 @@ if __name__ == "__main__":
     ip_broker = args.ip_broker
     db_path = args.db_path
     map_path = "EC_locations.json"  # Ruta del mapa de localizaciones
+
+    SERVER = ip_broker
 
     ec_central = EC_Central(puerto, ip_broker, map_path, db_path)
     threading.Thread(target=ec_central.iniciar_http_server, daemon=True).start()
